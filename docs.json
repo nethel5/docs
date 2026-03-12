@@ -1,7 +1,7 @@
 {
   "$schema": "https://mintlify.com/docs.json",
   "theme": "mint",
-  "name": "Mint Starter Kit",
+  "name": "MVSoftware",
   "colors": {
     "primary": "#16A34A",
     "light": "#07C983",
@@ -11,38 +11,216 @@
   "navigation": {
     "tabs": [
       {
-        "tab": "Guides",
+        "tab": "Overview",
         "groups": [
           {
             "group": "Getting started",
             "pages": [
               "index",
               "quickstart",
-              "development"
+              "environment-variables"
             ]
           },
           {
-            "group": "Customization",
+            "group": "Architecture",
             "pages": [
-              "essentials/settings",
-              "essentials/navigation"
+              "architecture/overview",
+              "architecture/database",
+              "architecture/resilience",
+              "architecture/logging"
             ]
           },
           {
-            "group": "Writing content",
+            "group": "Authentication",
             "pages": [
-              "essentials/markdown",
-              "essentials/code",
-              "essentials/images",
-              "essentials/reusable-snippets"
+              "auth/overview",
+              "auth/roles",
+              "auth/oauth-connections"
             ]
           },
           {
-            "group": "AI tools",
+            "group": "UI components",
             "pages": [
-              "ai-tools/cursor",
-              "ai-tools/claude-code",
-              "ai-tools/windsurf"
+              "ui/overview",
+              "ui/theming",
+              "ui/component-library"
+            ]
+          },
+          {
+            "group": "Deployment",
+            "pages": [
+              "deployment/vercel",
+              "deployment/cron-jobs",
+              "deployment/monitoring"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Vantaca-Jobber sync",
+        "groups": [
+          {
+            "group": "Overview",
+            "pages": [
+              "vantaca-jobber/index"
+            ]
+          },
+          {
+            "group": "Configuration",
+            "pages": [
+              "vantaca-jobber/setup"
+            ]
+          },
+          {
+            "group": "Sync pipeline",
+            "pages": [
+              "vantaca-jobber/pipeline",
+              "vantaca-jobber/attachments"
+            ]
+          },
+          {
+            "group": "Operations",
+            "pages": [
+              "vantaca-jobber/dashboard",
+              "vantaca-jobber/webhooks",
+              "vantaca-jobber/troubleshooting"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "TimeTrack",
+        "groups": [
+          {
+            "group": "Overview",
+            "pages": [
+              "timetrack/index"
+            ]
+          },
+          {
+            "group": "Data sync",
+            "pages": [
+              "timetrack/clickup-sync",
+              "timetrack/user-management"
+            ]
+          },
+          {
+            "group": "AI classification",
+            "pages": [
+              "timetrack/ai-classifier",
+              "timetrack/flags",
+              "timetrack/keyword-context"
+            ]
+          },
+          {
+            "group": "Billing engine",
+            "pages": [
+              "timetrack/billability",
+              "timetrack/rate-calculator",
+              "timetrack/gl-codes"
+            ]
+          },
+          {
+            "group": "Approval workflow",
+            "pages": [
+              "timetrack/approvals",
+              "timetrack/approval-queues"
+            ]
+          },
+          {
+            "group": "Export",
+            "pages": [
+              "timetrack/qbo-export",
+              "timetrack/export-validation"
+            ]
+          },
+          {
+            "group": "Capital projects",
+            "pages": [
+              "timetrack/capital-projects"
+            ]
+          },
+          {
+            "group": "Reports & admin",
+            "pages": [
+              "timetrack/reports",
+              "timetrack/settings"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Job scrubbing",
+        "groups": [
+          {
+            "group": "Overview",
+            "pages": [
+              "scrubbing/index"
+            ]
+          },
+          {
+            "group": "Workflow",
+            "pages": [
+              "scrubbing/statuses",
+              "scrubbing/transitions"
+            ]
+          },
+          {
+            "group": "Kanban board",
+            "pages": [
+              "scrubbing/kanban",
+              "scrubbing/comments"
+            ]
+          },
+          {
+            "group": "Integration",
+            "pages": [
+              "scrubbing/jobber-webhook",
+              "scrubbing/reconciliation"
+            ]
+          },
+          {
+            "group": "Configuration",
+            "pages": [
+              "scrubbing/client-config"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Receipt analysis",
+        "groups": [
+          {
+            "group": "Overview",
+            "pages": [
+              "receipt-analysis/index"
+            ]
+          },
+          {
+            "group": "Upload & parsing",
+            "pages": [
+              "receipt-analysis/upload",
+              "receipt-analysis/extraction"
+            ]
+          },
+          {
+            "group": "Normalization",
+            "pages": [
+              "receipt-analysis/normalizer",
+              "receipt-analysis/price-tracking"
+            ]
+          },
+          {
+            "group": "Stocking intelligence",
+            "pages": [
+              "receipt-analysis/stocking",
+              "receipt-analysis/categories"
+            ]
+          },
+          {
+            "group": "Optimization",
+            "pages": [
+              "receipt-analysis/bulk-optimizer"
             ]
           }
         ]
@@ -51,18 +229,72 @@
         "tab": "API reference",
         "groups": [
           {
-            "group": "API documentation",
+            "group": "Overview",
             "pages": [
-              "api-reference/introduction"
+              "api-reference/index"
             ]
           },
           {
-            "group": "Endpoint examples",
+            "group": "Authentication",
             "pages": [
-              "api-reference/endpoint/get",
-              "api-reference/endpoint/create",
-              "api-reference/endpoint/delete",
-              "api-reference/endpoint/webhook"
+              "api-reference/auth"
+            ]
+          },
+          {
+            "group": "Health & infrastructure",
+            "pages": [
+              "api-reference/health",
+              "api-reference/cron",
+              "api-reference/webhooks",
+              "api-reference/pipeline"
+            ]
+          },
+          {
+            "group": "TimeTrack",
+            "pages": [
+              "api-reference/timetrack-sync",
+              "api-reference/timetrack-classification",
+              "api-reference/timetrack-documents",
+              "api-reference/timetrack-export",
+              "api-reference/timetrack-reports",
+              "api-reference/timetrack-admin",
+              "api-reference/timetrack-teams"
+            ]
+          },
+          {
+            "group": "Receipt analysis",
+            "pages": [
+              "api-reference/receipt-analysis"
+            ]
+          },
+          {
+            "group": "Teams bot",
+            "pages": [
+              "api-reference/teams-bot"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Teams bot",
+        "groups": [
+          {
+            "group": "Overview",
+            "pages": [
+              "teams-bot/index"
+            ]
+          },
+          {
+            "group": "Setup",
+            "pages": [
+              "teams-bot/setup"
+            ]
+          },
+          {
+            "group": "Notifications",
+            "pages": [
+              "teams-bot/notifications",
+              "teams-bot/queue"
             ]
           }
         ]
@@ -71,14 +303,9 @@
     "global": {
       "anchors": [
         {
-          "anchor": "Documentation",
-          "href": "https://mintlify.com/docs",
-          "icon": "book-open-cover"
-        },
-        {
-          "anchor": "Blog",
-          "href": "https://mintlify.com/blog",
-          "icon": "newspaper"
+          "anchor": "GitHub",
+          "href": "https://github.com",
+          "icon": "github"
         }
       ]
     }
@@ -88,35 +315,15 @@
     "dark": "/logo/dark.svg"
   },
   "navbar": {
-    "links": [
-      {
-        "label": "Support",
-        "href": "mailto:hi@mintlify.com"
-      }
-    ],
     "primary": {
       "type": "button",
       "label": "Dashboard",
-      "href": "https://dashboard.mintlify.com"
+      "href": "https://mvsoftware.app"
     }
-  },
-  "contextual": {
-    "options": [
-     "copy",
-     "view",
-     "chatgpt",
-     "claude",
-     "perplexity",
-     "mcp",
-     "cursor",
-     "vscode"
-   ]
   },
   "footer": {
     "socials": {
-      "x": "https://x.com/mintlify",
-      "github": "https://github.com/mintlify",
-      "linkedin": "https://linkedin.com/company/mintlify"
+      "github": "https://github.com"
     }
   }
 }

@@ -1,0 +1,74 @@
+---
+title: "Authentication"
+description: "Azure AD OAuth flow with NextAuth.js session management."
+---
+
+MVSoftware uses NextAuth.js with Azure AD as the primary authentication provider. All routes except the login page require authentication.
+
+## Authentication flow
+
+<Steps>
+  <Step title="User initiates login">
+    The user is redirected to the Azure AD login page via NextAuth.js.
+  </Step>
+  <Step title="Azure AD authenticates">
+    Azure AD validates credentials and returns an authorization code with scopes: `openid`, `profile`, `email`, `User.Read`, `Directory.Read.All`, `offline_access`.
+  </Step>
+  <Step title="Token exchange">
+    NextAuth exchanges the code for access and refresh tokens.
+  </Step>
+  <Step title="Profile enrichment">
+    The `signIn` callback fetches additional data from Microsoft Graph:
+    - User profile (name, email, job title, department)
+    - Manager information (name, email)
+    - Direct reports (for role determination)
+    - Accounting group membership (via `MV_ACCOUNTING_GROUP_ID`)
+  </Step>
+  <Step title="Database upsert">
+    User data is upserted to Supabase on every login to keep profiles current.
+  </Step>
+  <Step title="JWT session">
+    A JWT token is issued and stored in a secure HTTP-only cookie. The session strategy is JWT-based (not database sessions).
+  </Step>
+</Steps>
+
+## Token refresh
+
+Access tokens have a short lifespan. The middleware checks token expiration on every request and automatically refreshes tokens that expire within 5 minutes using the stored refresh token.
+
+If the refresh fails, the user is redirected to the login page with a `SessionExpired` error.
+
+## Route protection
+
+The `middleware.ts` file protects all routes except:
+- `/api/*` (API routes handle their own auth)
+- `/_next/*` (static assets)
+- `/favicon.ico`
+
+For role-based route restrictions, see [roles and permissions](/auth/roles).
+
+## Session data
+
+The authenticated session includes:
+
+```typescript
+interface Session {
+  user: {
+    id: string;
+    email: string;
+    name: string;
+    role: "admin" | "approver" | "viewer";
+    azureId: string;
+    hasDirectReports: boolean;
+    managerId?: string;
+    managerName?: string;
+    managerEmail?: string;
+    jobTitle?: string;
+    department?: string;
+  }
+}
+```
+
+## E2E test bypass
+
+In non-production environments, a `CredentialsProvider` is available for E2E test authentication using the `E2E_TEST_SECRET` environment variable. This provider is never registered in production.

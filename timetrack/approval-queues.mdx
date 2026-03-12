@@ -1,0 +1,47 @@
+---
+title: "Approval queues"
+description: "UI components for reviewing and processing flagged time entries."
+---
+
+The approvals page at `/timetrack/approvals` provides multiple queue views for processing flagged time entries. Access requires the `approver` or `admin` role.
+
+## Queue types
+
+### Approval queue
+
+The primary queue showing all entries assigned to the current approver. Each entry displays:
+- Entry description and duration
+- Author name and department
+- Client assignment
+- Active flags with severity indicators
+- AI classification and confidence score
+
+### Contradiction review queue
+
+Entries where the AI classification conflicts with manual overrides or historical patterns. These entries need a human decision to resolve the contradiction.
+
+### Client assignment queue
+
+Entries flagged with `missing_client` or `incorrect_client`. The reviewer assigns or corrects the client before the entry can be billed.
+
+## Approval card
+
+Each entry in the queue is rendered as an `ApprovalCard` component showing:
+- Entry metadata (author, date, duration, task)
+- AI classification with confidence bar
+- List of active flags with descriptions
+- Approval actions (approve, reject, return)
+- Resolution note input for documenting decisions
+
+## Filters
+
+The approval page supports filtering by:
+- Flag type
+- Author
+- Client
+- Date range
+- Escalation status
+
+## Daily reminders
+
+The `daily-reminders` cron job sends Teams notifications to approvers with pending items in their queue. See [Teams bot notifications](/teams-bot/notifications) for details.

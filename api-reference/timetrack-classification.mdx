@@ -1,0 +1,62 @@
+---
+title: "TimeTrack classification"
+description: "AI-powered billability classification endpoints."
+---
+
+## `POST /api/timetrack/classify`
+
+Classify a batch of time entries using the rules engine and AI classifier.
+
+**Auth**: Session (admin only).
+
+<ParamField body="entryIds" type="string[]" required>
+  Array of time entry IDs to classify. Maximum 500.
+</ParamField>
+
+**Response** `200`
+```json
+{
+  "success": true,
+  "results": [
+    {
+      "entryId": "entry-123",
+      "billable": true,
+      "confidence": 0.92,
+      "category": "maintenance",
+      "flags": []
+    },
+    {
+      "entryId": "entry-456",
+      "billable": false,
+      "confidence": 0.65,
+      "category": "internal",
+      "flags": ["low_ai_confidence"]
+    }
+  ],
+  "summary": {
+    "total": 2,
+    "billable": 1,
+    "nonBillable": 1,
+    "flagged": 1
+  }
+}
+```
+
+---
+
+## `POST /api/timetrack/classify/stream`
+
+Streaming classification with per-entry progress events.
+
+**Auth**: Session (admin only).
+
+<ParamField body="entryIds" type="string[]" required>
+  Array of time entry IDs to classify.
+</ParamField>
+
+**Response**: NDJSON stream:
+```json
+{"type": "progress", "entryId": "entry-123", "index": 1, "total": 50}
+{"type": "result", "entryId": "entry-123", "billable": true, "confidence": 0.92}
+{"type": "complete", "summary": {"total": 50, "billable": 35, "flagged": 5}}
+```

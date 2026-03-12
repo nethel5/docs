@@ -1,0 +1,49 @@
+---
+title: "Kanban board"
+description: "Visual workflow board for managing job scrubbing status."
+---
+
+The Kanban board at `/scrubbing` displays all active scrubbing jobs organized by status columns. It uses the `@hello-pangea/dnd` library for drag-and-drop functionality.
+
+## Layout
+
+The board displays columns for each active status (terminal statuses are hidden by default):
+
+```
+in_field | action_required | needs_scrubbing | recurring_review | scrubbing | ready_for_review | changes_required | client_approval | ready_to_bill
+```
+
+Each job card shows:
+- Job title and Jobber ID
+- Client name
+- Current assignee (if claimed)
+- Time in current status
+- Comment count
+- Priority indicators
+
+## Interactions
+
+### Claiming a job
+
+Click on a job in the `needs_scrubbing` column to claim it. This moves it to `scrubbing` and assigns it to you.
+
+### Submitting for review
+
+From the job detail view, click "Submit for review" to move the job to `ready_for_review`. You can add review notes with the submission.
+
+### Adding comments
+
+Comments can be added to any job regardless of status. Comments are typed as `note`, `review`, or `status_change`.
+
+### Drag and drop
+
+Jobs can be dragged between columns when the transition is valid. Invalid drops are rejected and the card snaps back to its original position.
+
+## Filtering
+
+The board supports filtering by:
+- Client name
+- Assigned scrubber
+- Status
+- Date range
+- Jobs with comments vs. uncommented

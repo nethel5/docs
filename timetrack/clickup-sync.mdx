@@ -1,0 +1,51 @@
+---
+title: "ClickUp sync"
+description: "Poll time entries from ClickUp and synchronize to the local database."
+---
+
+The ClickUp sync module (`lib/timetrack-sync.ts`) polls time entries from configured ClickUp spaces and lists, normalizes the data, and stores it in Supabase.
+
+## Sync process
+
+<Steps>
+  <Step title="Authenticate">
+    The sync uses OAuth tokens stored in Supabase. Tokens are refreshed automatically before expiration.
+  </Step>
+  <Step title="Poll spaces and lists">
+    Time entries are fetched from configured ClickUp spaces. The sync tracks the last-polled timestamp for incremental updates.
+  </Step>
+  <Step title="Normalize entries">
+    Raw ClickUp data is normalized into the `time_entries` schema: duration, description, user, task, timestamps.
+  </Step>
+  <Step title="Resolve users">
+    ClickUp user IDs are mapped to Azure AD users for name, email, manager, and department data.
+  </Step>
+  <Step title="Upsert to database">
+    Entries are upserted by `clickup_id` to handle both new and updated entries without duplicates.
+  </Step>
+</Steps>
+
+## API endpoints
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/timetrack/sync` | POST | Trigger a manual sync |
+| `/api/timetrack/sync/spaces` | GET | List available ClickUp spaces |
+| `/api/timetrack/sync/users` | GET | List ClickUp team members |
+| `/api/timetrack/documents` | GET | List synced time entries with filters |
+| `/api/timetrack/lists` | GET | List available spaces and lists |
+
+## ClickUp OAuth setup
+
+See [OAuth connections](/auth/oauth-connections) for the ClickUp OAuth setup process. The ClickUp client (`lib/clickup-client.ts`) uses the REST API with OAuth tokens.
+
+## Incremental sync
+
+The sync tracks the timestamp of the last successful poll. Each subsequent sync only fetches entries created or modified after that timestamp, minimizing API calls and processing time.
+
+## Error handling
+
+If the ClickUp API is unavailable, the sync uses [resilience patterns](/architecture/resilience):
+- Retries with exponential backoff (up to 3 attempts)
+- Circuit breaker opens after 5 consecutive failures
+- Failed syncs are logged to Sentry with full context

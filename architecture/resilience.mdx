@@ -1,0 +1,90 @@
+---
+title: "Resilience patterns"
+description: "Retry, circuit breaker, and timeout patterns for external API calls."
+---
+
+All external API calls in MVSoftware are wrapped in resilience patterns defined in `lib/resilience.ts`. These patterns prevent cascading failures when external services are slow or unavailable.
+
+## Retry with exponential backoff
+
+Failed requests are retried with exponential backoff and jitter to prevent thundering herd problems.
+
+```typescript
+interface RetryOptions {
+  maxRetries: number;        // Default: 3
+  baseDelayMs: number;       // Default: 1000
+  maxDelayMs: number;        // Default: 30000
+  backoffMultiplier: number; // Default: 2
+  jitter: boolean;           // Default: true
+  isRetryable?: (error: Error) => boolean;
+  onRetry?: (error: Error, attempt: number, delayMs: number) => void;
+}
+```
+
+The default configuration retries up to 3 times with delays of approximately 1s, 2s, and 4s (plus jitter). The `isRetryable` function allows filtering out non-transient errors like 400 Bad Request.
+
+## Circuit breaker
+
+The circuit breaker prevents repeated calls to a failing service, giving it time to recover.
+
+```typescript
+interface CircuitBreakerOptions {
+  failureThreshold: number;  // Default: 5 failures before opening
+  resetTimeoutMs: number;    // Default: 60000 (1 minute)
+  successThreshold: number;  // Default: 2 successes to close
+  onStateChange?: (name: string, oldState: CircuitState, newState: CircuitState) => void;
+}
+```
+
+### States
+
+| State | Behavior |
+|-------|----------|
+| **Closed** | Requests pass through normally. Failures are counted. |
+| **Open** | All requests fail immediately without calling the service. Entered after `failureThreshold` consecutive failures. |
+| **Half-open** | A limited number of requests are allowed through to test if the service has recovered. Entered after `resetTimeoutMs` elapses. |
+
+The circuit transitions back to **closed** after `successThreshold` successful calls in the half-open state.
+
+## Timeout
+
+Wraps operations with a configurable timeout to prevent indefinite hangs.
+
+```typescript
+interface TimeoutOptions {
+  timeoutMs: number;
+  timeoutMessage?: string;
+}
+```
+
+## Composition
+
+These patterns are composed in a specific order for each API client:
+
+```
+Request → Timeout → Retry → Circuit Breaker → External API
+```
+
+This means:
+1. The overall operation has a timeout limit
+2. Within that limit, failed requests are retried with backoff
+3. If too many requests fail, the circuit opens and requests fail fast
+
+## Circuit breaker stats
+
+Each circuit breaker exposes stats for monitoring:
+
+```typescript
+interface CircuitBreakerStats {
+  state: CircuitState;
+  failures: number;
+  successes: number;
+  lastFailureTime: number | null;
+  lastSuccessTime: number | null;
+  totalRequests: number;
+  totalFailures: number;
+  totalSuccesses: number;
+}
+```
+
+These stats are reported through the `/api/health/services` endpoint. See [monitoring](/deployment/monitoring) for details.

@@ -1,0 +1,57 @@
+---
+title: "Roles and permissions"
+description: "Role-based access control with admin, approver, and viewer roles."
+---
+
+MVSoftware uses three roles determined at login time based on Azure AD data. Roles are stored in the JWT session and enforced by middleware.
+
+## Role hierarchy
+
+| Role | Access level |
+|------|-------------|
+| **Admin** | Full access to all features including settings, export, and admin tools |
+| **Approver** | Can review and approve time entries and scrubbing jobs |
+| **Viewer** | Read-only access to own time entries only |
+
+## Role determination
+
+Roles are assigned in `lib/auth-types.ts` using the `determineRole` function:
+
+<Steps>
+  <Step title="Check admin list">
+    If the user's email matches a hardcoded admin list, they receive the `admin` role.
+  </Step>
+  <Step title="Check accounting group">
+    If the user is a member of the Azure AD group specified by `MV_ACCOUNTING_GROUP_ID`, they receive the `approver` role.
+  </Step>
+  <Step title="Check direct reports">
+    If the user has direct reports in Azure AD (they are a manager), they receive the `approver` role.
+  </Step>
+  <Step title="Default to viewer">
+    All other authenticated users receive the `viewer` role with access limited to their own data.
+  </Step>
+</Steps>
+
+## Protected routes
+
+The middleware enforces these restrictions:
+
+| Route | Required role |
+|-------|--------------|
+| `/timetrack/settings` | Admin |
+| `/timetrack/export` | Admin |
+| `/timetrack/approvals` | Approver or admin |
+| All other `/timetrack/*` | Any authenticated user |
+| `/scrubbing/*` | Any authenticated user |
+| `/receipt-analysis/*` | Any authenticated user |
+
+## Data isolation
+
+Viewers can only see their own time entries. The `viewer` role enforces data isolation at the query level using the user's ClickUp user ID to filter results. Approvers and admins can see all entries.
+
+## API route authentication
+
+API routes handle their own authentication:
+- **Cron endpoints**: Authenticated with `CRON_SECRET` bearer token via `isCronAuthorized()`
+- **Webhook endpoints**: Authenticated with HMAC-SHA256 signature verification
+- **User-facing endpoints**: Authenticated via NextAuth session

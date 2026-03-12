@@ -1,0 +1,97 @@
+---
+title: "TimeTrack documents"
+description: "Contract document upload, retrieval, and AI-powered parsing."
+---
+
+## `POST /api/timetrack/documents`
+
+Upload a contract document for a client.
+
+**Auth**: Session (admin only).
+
+**Request**: `multipart/form-data`
+
+<ParamField body="file" type="File" required>
+  PDF, PNG, or JPEG file. Maximum 10 MB.
+</ParamField>
+
+<ParamField body="clientId" type="string" required>
+  Client this document belongs to.
+</ParamField>
+
+<ParamField body="documentType" type="string" required>
+  Document type (e.g., "contract", "amendment").
+</ParamField>
+
+**Response** `200`
+```json
+{
+  "documentId": "doc-abc123",
+  "fileUrl": "https://...",
+  "contentHash": "sha256:..."
+}
+```
+
+---
+
+## `GET /api/timetrack/documents/[id]`
+
+Get document metadata or download the file.
+
+**Auth**: Session (admin or approver).
+
+<ParamField query="download" type="boolean">
+  Set to `true` to stream the file content instead of returning metadata.
+</ParamField>
+
+**Response** `200` (metadata):
+```json
+{
+  "id": "doc-abc123",
+  "clientId": "client-456",
+  "documentType": "contract",
+  "fileUrl": "https://...",
+  "createdAt": "2025-01-15T10:30:00Z"
+}
+```
+
+**Response** `200` (download): File stream with `Content-Disposition` header.
+
+---
+
+## `POST /api/timetrack/documents/[id]/parse`
+
+Extract billing terms from a document using AI.
+
+**Auth**: Session (admin only).
+
+**Response** `200`
+```json
+{
+  "success": true,
+  "extractedTerms": {
+    "hourlyRate": 150,
+    "effectiveDate": "2025-01-01",
+    "clientName": "Mountain View HOA"
+  },
+  "contractDocId": "doc-abc123"
+}
+```
+
+---
+
+## `GET /api/timetrack/document-counts`
+
+Get document counts per client.
+
+**Auth**: Session.
+
+**Response** `200`
+```json
+{
+  "counts": {
+    "client-123": 3,
+    "client-456": 1
+  }
+}
+```

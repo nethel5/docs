@@ -1,0 +1,42 @@
+---
+title: "Pipeline endpoints"
+description: "Retry and recovery endpoints for the sync pipeline."
+---
+
+## `POST /api/pipeline/retry`
+
+Reset a single failed work order for reprocessing.
+
+**Auth**: Session (any authenticated user).
+
+<ParamField body="xnNumber" type="string" required>
+  The Vantaca XN number of the work order to retry.
+</ParamField>
+
+**Response** `200`
+```json
+{
+  "success": true,
+  "resetTo": "stored"
+}
+```
+
+---
+
+## `POST /api/pipeline/retry-all`
+
+Bulk reset all failed work orders for reprocessing.
+
+**Auth**: Session (admin only).
+
+<Warning>
+  This resets all failed work orders. Use with caution in production.
+</Warning>
+
+**Response** `200`
+```json
+{
+  "success": true,
+  "count": 7
+}
+```

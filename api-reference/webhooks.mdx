@@ -1,0 +1,42 @@
+---
+title: "Webhook endpoints"
+description: "Jobber webhook handler for real-time event processing."
+---
+
+## `POST /api/webhooks/jobber`
+
+Receives and processes Jobber webhook events for job status updates.
+
+**Auth**: HMAC-SHA256 signature verification using `JOBBER_CLIENT_SECRET`.
+
+<ParamField header="X-Jobber-Hmac-SHA256" type="string" required>
+  HMAC-SHA256 signature of the request body.
+</ParamField>
+
+**Request body**: Jobber event payload (varies by event type).
+
+**Response** `200`
+```json
+{
+  "success": true,
+  "processed": true
+}
+```
+
+### Event processing
+
+The webhook handler routes events to two modules:
+1. **Vantaca-Jobber sync** — updates job mappings and pipeline state
+2. **Job scrubbing** — updates scrubbing job statuses when Jobber jobs change
+
+### Idempotency
+
+The handler is idempotent. Processing the same event twice produces the same result. Jobber automatically retries failed webhooks.
+
+### Error responses
+
+| Status | Meaning |
+|--------|---------|
+| 401 | Invalid HMAC signature |
+| 404 | Job not found in local database |
+| 500 | Processing error (Jobber will retry) |

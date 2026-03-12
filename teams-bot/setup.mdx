@@ -1,0 +1,49 @@
+---
+title: "Setup"
+description: "Register the bot with Microsoft Bot Framework and configure Teams integration."
+---
+
+## Prerequisites
+
+- An Azure AD tenant
+- Access to the Azure portal
+- A Microsoft Teams workspace
+
+## Registration
+
+<Steps>
+  <Step title="Create a bot registration">
+    In the Azure portal, create a new Bot Channels Registration:
+    1. Go to Azure Portal > Create a resource > Bot Channels Registration
+    2. Configure the messaging endpoint as: `https://your-app.vercel.app/api/teams/bot`
+    3. Note the **Bot ID** and create a **Bot Password**
+  </Step>
+  <Step title="Enable the Teams channel">
+    In the bot registration, go to Channels and add Microsoft Teams.
+  </Step>
+  <Step title="Create a Teams app">
+    In the Teams Developer Portal, create an app and connect it to your bot registration. Note the **App ID**.
+  </Step>
+  <Step title="Set environment variables">
+    ```bash
+    TEAMS_BOT_ID=your-bot-id
+    TEAMS_BOT_PASSWORD=your-bot-password
+    TEAMS_BOT_TENANT_ID=your-tenant-id
+    TEAMS_APP_ID=your-teams-app-id
+    ```
+  </Step>
+  <Step title="Configure the bot settings">
+    The `teams_bot_service_configuration` table stores webhook URLs and authentication details. These are populated during the first bot interaction.
+  </Step>
+</Steps>
+
+## Bot adapter
+
+The bot adapter (`lib/teams-bot/adapter.ts`) uses the `botbuilder` package to handle:
+- Incoming activity from Teams (messages, reactions)
+- Outgoing proactive messages (notifications)
+- Authentication with the Bot Framework
+
+## Testing locally
+
+For local development, use a tool like [ngrok](https://ngrok.com) to expose your local server and set the messaging endpoint to the ngrok URL.

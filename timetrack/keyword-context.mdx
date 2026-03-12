@@ -1,0 +1,39 @@
+---
+title: "Keyword context"
+description: "Semantic patterns for personal space detection and multi-client entry identification."
+---
+
+The keyword context module (`lib/keyword-context.ts`) provides pattern matching for the AI classifier and flag system. It identifies entries that need special handling based on their content and context.
+
+## Personal space detection
+
+The personal space detector (`lib/personal-space-detector.ts`) identifies time entries logged against personal or internal ClickUp spaces that should not be billed to clients.
+
+Detection patterns include:
+- Entries in spaces marked as personal
+- Entries with internal task types (meetings, training, admin)
+- Entries matching known non-billable description patterns
+
+Entries flagged as `personal_space` are blocking — they cannot be exported until reviewed and either confirmed as non-billable or reclassified.
+
+## Kitchen sink detection
+
+The kitchen sink detector (`lib/kitchen-sink-detector.ts`) identifies entries that appear to cover work for multiple clients in a single time entry. These entries need to be split into separate entries per client.
+
+Detection signals:
+- Multiple client names mentioned in the description
+- Task context spanning different client projects
+- Unusually broad task descriptions covering multiple work areas
+
+Entries flagged as `kitchen_sink` are blocking and require the user to split the entry or explicitly confirm the client assignment.
+
+## Semantic search
+
+The keyword context module also provides patterns for the RAG-powered semantic search in the reports module. It uses Voyage AI embeddings (`lib/embeddings.ts`) to enable natural language queries over time entry data.
+
+Semantic search supports queries like:
+- "How much time was spent on plumbing repairs last month?"
+- "Show all after-hours work for client X"
+- "Find entries related to irrigation system maintenance"
+
+See [reports](/timetrack/reports) for the search interface.

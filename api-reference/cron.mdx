@@ -1,0 +1,151 @@
+---
+title: "Cron endpoints"
+description: "Scheduled task endpoints for syncing, notifications, and maintenance."
+---
+
+All cron endpoints require authentication via `X-Cron-Secret` header or `Authorization: Bearer <CRON_SECRET>`.
+
+## `GET /api/cron`
+
+Run the Vantaca-Jobber work order sync pipeline.
+
+**Rate limit**: 1 request per 60 seconds.
+
+**Response** `200`
+```json
+{
+  "workOrdersProcessed": 42,
+  "workOrdersCreated": 3,
+  "workOrdersUpdated": 12,
+  "jobsCreated": 3,
+  "errors": []
+}
+```
+
+---
+
+## `HEAD /api/cron`
+
+Health check for the sync endpoint.
+
+**Response** `200` with `X-Cron-Status: healthy` header.
+
+---
+
+## `GET /api/cron/approval-escalation`
+
+Escalate pending approvals after 12/48 hours. Sends Teams notifications for escalated items.
+
+**Response** `200`
+```json
+{
+  "success": true,
+  "reminders": 5,
+  "escalations": 2,
+  "skipped": 10
+}
+```
+
+---
+
+## `GET /api/cron/daily-reminders`
+
+Send daily timetrack reminders to Teams. Runs on weekdays only.
+
+**Response** `200`
+```json
+{
+  "success": true,
+  "checked": 15,
+  "reminded": 8,
+  "skipped": 7
+}
+```
+
+---
+
+## `GET /api/cron/receipt-sync`
+
+Sync and process new receipts from the BILL platform.
+
+**Response** `200`
+```json
+{
+  "success": true,
+  "sync": { "new": 3, "updated": 1 },
+  "process": { "processed": 3, "failed": 0, "totalItems": 47 }
+}
+```
+
+---
+
+## `GET /api/cron/export-readiness`
+
+Validate weekly export readiness and notify admins.
+
+**Response** `200`
+```json
+{
+  "success": true,
+  "exportData": { "ready": 142, "blocked": 8, "warnings": 3 }
+}
+```
+
+---
+
+## `GET /api/cron/flagged-review-digest`
+
+Aggregate un-notified entry flags into a reviewer digest.
+
+**Response** `200`
+```json
+{
+  "success": true,
+  "flaggedEntries": 12,
+  "reviewersNotified": 3
+}
+```
+
+---
+
+## `GET /api/cron/scrubbing-reconciliation`
+
+Reconcile scrubbing job statuses with Jobber.
+
+**Response** `200`
+```json
+{
+  "success": true,
+  "inserted": 2,
+  "updated": 5
+}
+```
+
+---
+
+## `GET /api/cron/teams-notifications`
+
+Process the Teams notification queue. Sends pending notifications in batch.
+
+**Response** `200`
+```json
+{
+  "success": true,
+  "processed": 8
+}
+```
+
+---
+
+## `GET /api/cron/weekly-digest`
+
+Send weekly digest to users with the feature enabled.
+
+**Response** `200`
+```json
+{
+  "success": true,
+  "queued": 12,
+  "total": 15
+}
+```

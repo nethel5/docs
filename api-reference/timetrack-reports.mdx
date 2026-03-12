@@ -1,0 +1,102 @@
+---
+title: "TimeTrack reports"
+description: "Utilization, billing, accuracy, and AI analytics endpoints."
+---
+
+## `GET /api/timetrack/reports`
+
+Multi-week utilization, billing, and accuracy reports.
+
+**Auth**: Session (admin or approver).
+
+<ParamField query="weeks" type="number" default="12">
+  Number of weeks of data to include.
+</ParamField>
+
+**Response** `200`
+```json
+{
+  "utilization": [
+    { "week": "2025-W03", "totalHours": 320, "billableHours": 260 }
+  ],
+  "billing": [
+    { "week": "2025-W03", "totalAmount": 39000, "exportedAmount": 35000 }
+  ],
+  "clientBilling": [
+    { "clientId": "client-456", "clientName": "Mountain View HOA", "hours": 45, "amount": 6750 }
+  ],
+  "accuracy": [
+    { "week": "2025-W03", "total": 150, "correct": 142, "overridden": 8 }
+  ]
+}
+```
+
+---
+
+## `GET /api/timetrack/reports/rag`
+
+AI classification distribution analysis.
+
+**Auth**: Session (admin or approver).
+
+**Response** `200`
+```json
+{
+  "categoryDistribution": [
+    { "category": "maintenance", "count": 85, "percentage": 0.42 }
+  ],
+  "confidenceBuckets": [
+    { "range": "0.9-1.0", "count": 120 },
+    { "range": "0.8-0.9", "count": 45 }
+  ],
+  "ragStrategies": [
+    { "strategy": "rule_match", "count": 100 },
+    { "strategy": "ai_classification", "count": 80 }
+  ]
+}
+```
+
+---
+
+## `POST /api/timetrack/approval-status`
+
+Batch lookup approval status for time entries.
+
+**Auth**: Session.
+
+<ParamField body="ids" type="string[]" required>
+  Entry IDs to check. Maximum 500.
+</ParamField>
+
+**Response** `200`
+```json
+{
+  "statuses": {
+    "entry-123": "approved",
+    "entry-456": "pending",
+    "entry-789": "escalated"
+  }
+}
+```
+
+---
+
+## `POST /api/timetrack/lists`
+
+Batch lookup ClickUp list names.
+
+**Auth**: Session.
+
+<ParamField body="ids" type="string[]" required>
+  ClickUp list IDs. Maximum 500.
+</ParamField>
+
+**Response** `200`
+```json
+{
+  "lists": {
+    "list-123": "Irrigation Maintenance",
+    "list-456": "Emergency Repairs"
+  }
+}
+```

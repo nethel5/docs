@@ -1,0 +1,42 @@
+---
+title: "Stocking engine"
+description: "Van stocking recommendations based on usage patterns and inventory data."
+---
+
+The stocking engine (`lib/stocking-engine.ts`) analyzes historical purchase data to recommend which items each service van should carry and in what quantities.
+
+## How recommendations are generated
+
+The engine considers:
+- **Purchase frequency**: How often each item appears in receipts
+- **Usage volume**: Total quantity consumed over time
+- **Seasonality**: Patterns in demand across months
+- **Van capacity**: Physical constraints on what can be carried
+- **Cost**: Higher-cost items may have lower recommended quantities
+
+## Recommendation output
+
+Each recommendation includes:
+- Product name and category
+- Recommended quantity
+- Reorder point (when to replenish)
+- Historical usage data supporting the recommendation
+- Confidence level
+
+## Stocking categories
+
+Products are organized into categories defined in `lib/stocking-categories.ts`. The category hierarchy helps organize recommendations by type of work (plumbing, electrical, irrigation, etc.).
+
+## Pages
+
+The stocking page at `/receipt-analysis/stocking` displays:
+- Current recommendations by category
+- Usage trends
+- Inventory gap analysis
+
+## API endpoints
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/receipt-analysis/stocking` | GET | Current recommendations |
+| `/api/receipt-analysis/stocking/generate` | POST | Generate fresh recommendations |

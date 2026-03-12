@@ -1,0 +1,86 @@
+---
+title: "Monitoring"
+description: "Health checks, Sentry integration, and service status monitoring."
+---
+
+## Health endpoints
+
+MVSoftware exposes two health check endpoints for monitoring:
+
+### `GET /api/health`
+
+Returns the overall application health status:
+
+```json
+{
+  "status": "healthy",
+  "version": "abc1234",
+  "uptime": 3600
+}
+```
+
+### `GET /api/health/services`
+
+Returns per-service health metrics including circuit breaker states:
+
+```json
+{
+  "vantaca": {
+    "status": "healthy",
+    "circuitBreaker": {
+      "state": "closed",
+      "failures": 0,
+      "totalRequests": 1523,
+      "lastSuccessTime": "2025-01-15T10:30:00Z"
+    }
+  },
+  "jobber": {
+    "status": "degraded",
+    "circuitBreaker": {
+      "state": "half-open",
+      "failures": 3,
+      "totalRequests": 842
+    }
+  }
+}
+```
+
+## Sentry
+
+Sentry provides error tracking and performance monitoring across all runtimes.
+
+### Error tracking
+
+Errors captured via `logError()` are sent to Sentry with:
+- Exception details and stack trace
+- Custom tags (`operation`, `module`)
+- Extra context (request ID, entity IDs, attempt counts)
+
+### Performance monitoring
+
+Sentry automatically instruments:
+- API route response times
+- Server component render duration
+- External HTTP call latency
+- Database query performance
+
+Cron jobs are wrapped in custom Sentry spans with operation names like `cron.sync` and `cron.manual_sync`.
+
+### Source maps
+
+Source maps are uploaded during the build process using `SENTRY_AUTH_TOKEN` for readable stack traces in production.
+
+## Request tracing
+
+Every incoming request receives a unique `x-request-id` correlation ID set in `middleware.ts`. This ID:
+- Propagates through all log entries for the request
+- Appears in Sentry events
+- Is available in response headers for debugging
+
+## Alerting
+
+Configure Sentry alerts for:
+- Elevated error rates on sync endpoints
+- Circuit breaker state changes (service degradation)
+- Slow cron job execution times
+- Unhandled exceptions in API routes

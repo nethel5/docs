@@ -1,0 +1,56 @@
+---
+title: "Billability engine"
+description: "Rate calculations, multipliers, and cost allocation for billable time entries."
+---
+
+The billability engine (`lib/billability-engine.ts`) calculates the dollar amount for each billable time entry. It applies client-specific rates, time-based multipliers, and cost allocation rules.
+
+## Calculation flow
+
+```mermaid
+graph LR
+    E[Time entry] --> R[Rate lookup]
+    R --> M[Apply multipliers]
+    M --> GL[Assign GL code]
+    GL --> A[Final amount]
+```
+
+<Steps>
+  <Step title="Rate lookup">
+    The rate calculator finds the applicable hourly rate based on:
+    - Employee ID and client ID
+    - Rate overrides (per-employee, per-client)
+    - Effective date (rates can change over time)
+  </Step>
+  <Step title="Apply multipliers">
+    Time-based multipliers adjust the rate:
+    - **After-hours premium**: $200/hour for work on evenings and weekends
+    - **Holiday rates**: configurable multipliers for recognized holidays
+
+    After-hours entries require approval before export.
+  </Step>
+  <Step title="GL code assignment">
+    Each entry receives a general ledger code based on the task type and client. The GL code assigner (`lib/gl-code-assigner.ts`) maps task categories to accounting codes.
+  </Step>
+  <Step title="Final calculation">
+    `amount = duration_hours × hourly_rate × multiplier`
+  </Step>
+</Steps>
+
+## After-hours detection
+
+The engine uses `BUSINESS_TIMEZONE` (default: `America/Denver`) to determine business hours. Work logged outside standard hours is flagged with `after_hours` and the premium rate is applied pending approval.
+
+## Batch recalculation
+
+If rates change or errors are discovered, the admin can trigger a batch recalculation:
+
+```
+POST /api/timetrack/admin/recalculate-amounts
+```
+
+This re-runs the billability engine on all entries matching the specified filters without re-classifying them.
+
+## Missing rates
+
+If no rate is found for an employee/client combination, the entry is flagged with `missing_rate` (blocking). An admin must configure the rate in the employee rates table before the entry can be exported.

@@ -1,0 +1,73 @@
+---
+title: "OAuth connections"
+description: "Manage OAuth tokens for Jobber, ClickUp, and QuickBooks integrations."
+---
+
+MVSoftware connects to three external services via OAuth 2.0. Each connection has its own auth module, token storage, and refresh logic.
+
+## Connection overview
+
+| Service | Auth module | Token storage | OAuth flow |
+|---------|------------|---------------|------------|
+| Jobber | `lib/jobber-auth.ts` | `jobber_oauth_tokens` table | Authorization code |
+| ClickUp | `lib/clickup-auth.ts` | Supabase | Authorization code |
+| QuickBooks | `lib/qbo-auth.ts` | Supabase | Authorization code |
+
+## Setup flow
+
+Each service follows the same pattern:
+
+<Steps>
+  <Step title="Register the OAuth app">
+    Create an OAuth application in the service's developer portal and note the client ID and secret.
+  </Step>
+  <Step title="Configure environment variables">
+    Set the `CLIENT_ID`, `CLIENT_SECRET`, and `REDIRECT_URI` for the service in `.env.local`.
+  </Step>
+  <Step title="Initiate the OAuth flow">
+    Navigate to the service's auth endpoint in MVSoftware:
+    - Jobber: `/api/auth/jobber`
+    - ClickUp: `/api/auth/clickup`
+    - QuickBooks: `/api/auth/qbo`
+  </Step>
+  <Step title="Authorize and callback">
+    After granting access, the service redirects to the callback URL where MVSoftware exchanges the code for tokens and stores them.
+  </Step>
+</Steps>
+
+## Token lifecycle
+
+All OAuth modules handle:
+- **Token storage**: Access tokens, refresh tokens, and expiration timestamps stored in Supabase
+- **Automatic refresh**: Tokens are refreshed before expiration when making API calls
+- **Encryption**: Tokens are encrypted at rest using `lib/token-encryption.ts`
+- **Error recovery**: If a refresh fails, the token is marked as expired and the admin is notified to re-authorize
+
+## Jobber
+
+Jobber uses GraphQL and requires OAuth for all API access. The Jobber connection is required for:
+- Creating and updating jobs from Vantaca work orders
+- Receiving webhook notifications for job status changes
+- Managing custom fields (XN number mapping)
+
+**Callback URL**: `/api/auth/jobber/callback`
+
+## ClickUp
+
+ClickUp provides time entry data for the TimeTrack module. The ClickUp connection is required for:
+- Polling time entries from configured spaces and lists
+- Resolving user and team information
+
+**Callback URL**: `/api/auth/clickup/callback`
+
+## QuickBooks Online
+
+<Note>QBO is optional. TimeTrack features work without it, but export functionality is disabled.</Note>
+
+QuickBooks receives batch exports of approved time entries. The QBO connection is required for:
+- Exporting time entries as billable hours
+- Syncing GL code mappings
+
+**Callback URL**: `/api/auth/qbo/callback`
+
+Set `QBO_ENVIRONMENT` to `sandbox` during development to avoid affecting production data.

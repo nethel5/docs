@@ -1,0 +1,50 @@
+---
+title: "Notification queue"
+description: "Queue-based notification delivery with retry logic."
+---
+
+## Queue architecture
+
+Notifications are stored in the `teams_notification_queue` table before delivery. The `teams-notifications` cron job processes the queue every minute.
+
+## Queue entry fields
+
+| Field | Description |
+|-------|-------------|
+| `id` | Unique notification identifier |
+| `type` | Notification type (approval, reminder, escalation, etc.) |
+| `recipient` | Teams user or channel ID |
+| `payload` | Notification content (JSON) |
+| `status` | `pending`, `sent`, `failed` |
+| `attempts` | Number of delivery attempts |
+| `created_at` | When the notification was queued |
+| `sent_at` | When successfully delivered |
+| `error` | Error message if delivery failed |
+
+## Delivery process
+
+<Steps>
+  <Step title="Fetch pending">
+    The cron job queries for notifications with status `pending` or `failed` with fewer than 3 attempts.
+  </Step>
+  <Step title="Send via Bot Framework">
+    Each notification is sent through the Teams bot adapter as a proactive message.
+  </Step>
+  <Step title="Update status">
+    On success, the notification status is set to `sent` with a timestamp. On failure, the attempt count is incremented and the error is recorded.
+  </Step>
+</Steps>
+
+## Retry logic
+
+Failed notifications are retried up to 3 times. After 3 failed attempts, the notification remains in `failed` status and requires manual investigation.
+
+## Monitoring
+
+The Teams bot status is available at:
+
+```
+GET /api/timetrack/teams/status
+```
+
+This returns the current queue depth, recent delivery success rate, and any recurring failures.

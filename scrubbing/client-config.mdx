@@ -1,0 +1,29 @@
+---
+title: "Client configuration"
+description: "Client-specific approval routing and workflow settings."
+---
+
+The scrubbing settings page at `/scrubbing/settings` allows configuration of client-specific workflow rules stored in the `scrubbing_client_config` table.
+
+## Client approval routing
+
+Each client can have custom approval settings that determine:
+- Whether client approval is required before billing
+- Who receives the approval request
+- The approval deadline before escalation
+
+## Configuration options
+
+| Setting | Description |
+|---------|-------------|
+| Client approval required | Whether jobs for this client require the `client_approval` stage |
+| Approval contacts | Email addresses or users who receive approval requests |
+| Auto-approve threshold | Dollar amount below which jobs are auto-approved |
+| Recurring job handling | Whether recurring jobs skip the full scrubbing process |
+
+## Default behavior
+
+When no client-specific configuration exists:
+- Client approval is not required
+- Jobs proceed directly from `ready_for_review` to `ready_to_bill` after reviewer approval
+- Recurring jobs go through `recurring_review` for extras checking

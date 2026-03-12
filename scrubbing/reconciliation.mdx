@@ -1,0 +1,41 @@
+---
+title: "Reconciliation"
+description: "Scheduled reconciliation of scrubbing job statuses with Jobber."
+---
+
+The reconciliation module (`lib/scrubbing-reconciliation.ts`) periodically checks that scrubbing job statuses are consistent with their Jobber counterparts. This catches any updates missed by webhooks.
+
+## Why reconciliation is needed
+
+Webhooks can fail due to:
+- Network issues between Jobber and MVSoftware
+- Application downtime during webhook delivery
+- Webhook retry exhaustion
+- Race conditions during rapid status changes
+
+Reconciliation acts as a safety net, ensuring data consistency even when webhooks are missed.
+
+## How it works
+
+The reconciliation cron job (`POST /api/cron/scrubbing-reconciliation`) runs every 15 minutes:
+
+<Steps>
+  <Step title="Fetch active jobs">
+    Query all scrubbing jobs that are not in terminal statuses (`invoiced` or `archived`).
+  </Step>
+  <Step title="Check Jobber status">
+    For each active job, fetch the current status from the Jobber API.
+  </Step>
+  <Step title="Compare and update">
+    If the Jobber status has changed since the last check, update the scrubbing job and create a `system` comment recording the reconciliation.
+  </Step>
+  <Step title="Log results">
+    Report the number of jobs checked, updated, and any errors to Sentry.
+  </Step>
+</Steps>
+
+## Conflict resolution
+
+When reconciliation finds a discrepancy:
+- If the Jobber status is ahead of the scrubbing status (e.g., Jobber shows complete but scrubbing shows in_field), the scrubbing status is updated to match
+- If the scrubbing status is ahead (e.g., scrubbing shows ready_to_bill but Jobber shows active), the scrubbing status is preserved since it represents work done in MVSoftware

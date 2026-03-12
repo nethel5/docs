@@ -1,0 +1,31 @@
+---
+title: "Price tracking"
+description: "Historical price analysis across vendors for cost optimization."
+---
+
+The price tracker (`lib/price-tracker.ts`) maintains a history of prices for matched products across vendors. This enables cost comparison and identifies pricing trends.
+
+## How it works
+
+When a receipt item is matched to a canonical product, the price tracker records:
+- The vendor
+- The unit price
+- The date
+- The receipt reference
+
+This builds a historical price database in the `vendor_prices` table.
+
+## Vendor comparison
+
+For each product, the tracker can show:
+- Current price by vendor
+- Historical price trend per vendor
+- Best current price across all vendors
+- Price change alerts (significant increases or decreases)
+
+## Use cases
+
+- **Cost optimization**: Identify which vendor offers the best price for each product
+- **Budget forecasting**: Track price trends to predict future costs
+- **Anomaly detection**: Flag receipts where prices are significantly different from historical averages
+- **Bulk purchasing decisions**: Compare per-unit costs across package sizes and vendors

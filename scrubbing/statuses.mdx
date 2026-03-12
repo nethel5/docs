@@ -1,0 +1,61 @@
+---
+title: "Status stages"
+description: "Detailed description of each job scrubbing status and its purpose."
+---
+
+## Active statuses
+
+### `in_field`
+
+The job is currently being worked on by field technicians in Jobber. No scrubbing action is needed. The job enters the scrubbing workflow when the field work is complete and the Jobber status changes.
+
+### `action_required`
+
+The job needs attention before scrubbing can begin. Common reasons:
+- Missing information from the field team
+- Photos or documentation not yet uploaded
+- Job details need clarification
+
+### `needs_scrubbing`
+
+The job is ready for initial review. A scrubber can claim it and begin reviewing the work, expenses, and documentation.
+
+### `recurring_review`
+
+For recurring jobs, this status indicates the job needs a quick check for extras or changes from the standard service. Two outcomes:
+- **No extras found** → moves directly toward billing
+- **Extras found** → moves to `scrubbing` for full review
+
+### `scrubbing`
+
+The job is actively being reviewed by a scrubber. The scrubber checks:
+- Work completed matches the scope
+- Expenses are accurate
+- Documentation is complete
+- Client billing is correct
+
+### `ready_for_review`
+
+Scrubbing is complete. A senior reviewer checks the scrubber's work before the job proceeds to client approval or billing.
+
+### `changes_required`
+
+The reviewer found issues with the scrubbing work. The job is returned to the scrubber with notes about what needs correction.
+
+### `client_approval`
+
+The job is waiting for client review and approval of the charges. Client-specific approval routing is configured in the settings.
+
+### `ready_to_bill`
+
+The job is fully approved and ready to be invoiced. No further review is needed.
+
+## Terminal statuses
+
+### `invoiced`
+
+The invoice has been sent. The job is complete and removed from the active Kanban board.
+
+### `archived`
+
+The job was removed from the workflow without invoicing. Used for cancelled jobs, duplicates, or jobs that don't need billing.

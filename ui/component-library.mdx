@@ -1,0 +1,219 @@
+---
+title: "Component library"
+description: "All 25 shadcn/ui components available in the project."
+---
+
+All UI components are located in `components/ui/`. They are shadcn/ui components using the **New York** style with Radix UI primitives.
+
+## Component reference
+
+### Layout and containers
+
+<Accordion title="Card">
+  **File**: `components/ui/card.tsx`
+
+  Container with header, content, and footer sections.
+
+  Sub-components: `Card`, `CardHeader`, `CardTitle`, `CardDescription`, `CardAction`, `CardContent`, `CardFooter`
+</Accordion>
+
+<Accordion title="Dialog">
+  **File**: `components/ui/dialog.tsx`
+
+  Modal dialog with overlay, accessible focus management, and close button.
+
+  Sub-components: `Dialog`, `DialogTrigger`, `DialogPortal`, `DialogClose`, `DialogOverlay`, `DialogContent`, `DialogHeader`, `DialogFooter`, `DialogTitle`, `DialogDescription`
+</Accordion>
+
+<Accordion title="Sheet">
+  **File**: `components/ui/sheet.tsx`
+
+  Slide-out panel from the edge of the screen. Used for mobile navigation, detail views, and forms.
+</Accordion>
+
+<Accordion title="Collapsible">
+  **File**: `components/ui/collapsible.tsx`
+
+  Expandable/collapsible content section.
+</Accordion>
+
+<Accordion title="Separator">
+  **File**: `components/ui/separator.tsx`
+
+  Visual divider between content sections. Horizontal or vertical.
+</Accordion>
+
+<Accordion title="Tabs">
+  **File**: `components/ui/tabs.tsx`
+
+  Tabbed content panels.
+
+  Sub-components: `Tabs`, `TabsList`, `TabsTrigger`, `TabsContent`
+</Accordion>
+
+### Actions
+
+<Accordion title="Button">
+  **File**: `components/ui/button.tsx`
+
+  Primary action element with 6 variants and 8 sizes.
+
+  **Variants**: `default`, `destructive`, `outline`, `secondary`, `ghost`, `link`
+
+  **Sizes**: `default`, `xs`, `sm`, `lg`, `icon`, `icon-xs`, `icon-sm`, `icon-lg`
+</Accordion>
+
+<Accordion title="Dropdown menu">
+  **File**: `components/ui/dropdown-menu.tsx`
+
+  Context menu or action menu triggered by a button. Built on Radix DropdownMenu.
+</Accordion>
+
+### Forms
+
+<Accordion title="Input">
+  **File**: `components/ui/input.tsx`
+
+  Text input field with focus-visible ring and `aria-invalid` validation state.
+</Accordion>
+
+<Accordion title="Textarea">
+  **File**: `components/ui/textarea.tsx`
+
+  Multi-line text input.
+</Accordion>
+
+<Accordion title="Checkbox">
+  **File**: `components/ui/checkbox.tsx`
+
+  Checkbox with checkmark indicator. Built on Radix Checkbox.
+</Accordion>
+
+<Accordion title="Radio group">
+  **File**: `components/ui/radio-group.tsx`
+
+  Radio button group for single selection. Built on Radix RadioGroup.
+</Accordion>
+
+<Accordion title="Switch">
+  **File**: `components/ui/switch.tsx`
+
+  Toggle switch for boolean settings.
+</Accordion>
+
+<Accordion title="Select">
+  **File**: `components/ui/select.tsx`
+
+  Dropdown select with search and grouping.
+
+  Sub-components: `Select`, `SelectGroup`, `SelectValue`, `SelectTrigger`, `SelectContent`, `SelectLabel`, `SelectItem`, `SelectSeparator`
+</Accordion>
+
+<Accordion title="Label">
+  **File**: `components/ui/label.tsx`
+
+  Form field label with accessibility binding.
+</Accordion>
+
+<Accordion title="Calendar">
+  **File**: `components/ui/calendar.tsx`
+
+  Date picker calendar. Uses `react-day-picker`.
+</Accordion>
+
+### Data display
+
+<Accordion title="Table">
+  **File**: `components/ui/table.tsx`
+
+  Data table with header, body, row, and cell components.
+</Accordion>
+
+<Accordion title="Badge">
+  **File**: `components/ui/badge.tsx`
+
+  Small label for status indicators and tags.
+</Accordion>
+
+<Accordion title="Progress">
+  **File**: `components/ui/progress.tsx`
+
+  Horizontal progress bar.
+</Accordion>
+
+<Accordion title="Skeleton">
+  **File**: `components/ui/skeleton.tsx`
+
+  Loading placeholder with animation.
+</Accordion>
+
+### Feedback
+
+<Accordion title="Alert">
+  **File**: `components/ui/alert.tsx`
+
+  Inline alert message with `default` and `destructive` variants.
+</Accordion>
+
+<Accordion title="Alert dialog">
+  **File**: `components/ui/alert-dialog.tsx`
+
+  Confirmation dialog requiring user action. Used for destructive operations.
+</Accordion>
+
+<Accordion title="Sonner (toasts)">
+  **File**: `components/ui/sonner.tsx`
+
+  Toast notification system with custom icons for success, info, warning, error, and loading states. Theme-aware with custom CSS variables.
+</Accordion>
+
+### Overlays
+
+<Accordion title="Popover">
+  **File**: `components/ui/popover.tsx`
+
+  Floating content triggered by a button or element. Built on Radix Popover.
+</Accordion>
+
+<Accordion title="Tooltip">
+  **File**: `components/ui/tooltip.tsx`
+
+  Hover tooltip for additional context.
+</Accordion>
+
+## Adding new components
+
+Use the shadcn/ui CLI to add components:
+
+```bash
+npx shadcn@latest add <component-name>
+```
+
+This generates a new file in `components/ui/` following the project's existing patterns (New York style, oklch colors, `data-slot` attributes).
+
+## Form integration
+
+Forms use React Hook Form with Zod schema validation:
+
+```typescript
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { z } from "zod"
+
+const schema = z.object({
+  name: z.string().min(1),
+  email: z.string().email(),
+})
+
+const form = useForm({
+  resolver: zodResolver(schema),
+})
+```
+
+## Chart components
+
+Data visualizations use Recharts with the theme-aware chart colors (`--chart-1` through `--chart-5`). Charts are used in:
+- TimeTrack dashboard summaries
+- AI classifier accuracy trends
+- Receipt analysis pricing charts
+- Approval queue metrics

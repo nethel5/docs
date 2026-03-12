@@ -1,0 +1,39 @@
+---
+title: "GL codes"
+description: "General ledger code assignment for QuickBooks export."
+---
+
+GL (general ledger) codes map time entries to accounting categories in QuickBooks. The GL code assigner (`lib/gl-code-assigner.ts`) automatically assigns codes based on task type and client.
+
+## How GL codes are assigned
+
+Each time entry receives a GL code based on:
+1. **Task type** — the category of work performed (maintenance, repair, installation, etc.)
+2. **Client** — some clients have custom GL code mappings
+3. **Capital project** — entries linked to capital projects use asset-specific GL codes
+
+## GL code table
+
+The `gl_codes` table stores the mapping:
+
+| Column | Description |
+|--------|-------------|
+| `code` | The GL code string (e.g., "5100") |
+| `description` | Human-readable description |
+| `task_type` | The task type this code applies to |
+| `client_id` | Optional client-specific override |
+
+## Export integration
+
+GL codes are included in the QuickBooks export batch. Each line item in the export includes:
+- Employee name
+- Client name
+- Hours worked
+- Dollar amount
+- GL code
+
+See [QuickBooks export](/timetrack/qbo-export) for the full export format.
+
+## Missing GL codes
+
+If the assigner can't find a matching GL code for an entry's task type, the entry is still exportable but will use a default "uncategorized" GL code. Review these entries in the export preview to assign the correct code before sending to QuickBooks.

@@ -1,0 +1,68 @@
+---
+title: "Troubleshooting"
+description: "Common sync issues and how to resolve them."
+---
+
+## Common issues
+
+<AccordionGroup>
+  <Accordion title="Work orders not syncing to Jobber">
+    **Check the work order step.** Only steps 757, 802, and 677 trigger Jobber job creation. Work orders in other steps appear in the `monitoring` state.
+
+    **Check the cron job.** Verify the cron endpoint is running and the `CRON_SECRET` is correctly configured. Hit `HEAD /api/cron` to check health.
+
+    **Check the Vantaca credentials.** Verify `VANTACA_API_URL`, `VANTACA_COMPANY_ID`, `VANTACA_USER_ID`, and `VANTACA_PASSWORD` are correct by triggering a manual sync and checking the response.
+  </Accordion>
+
+  <Accordion title="Jobber job creation fails">
+    **Check the OAuth token.** Navigate to `/api/auth/jobber` to re-authorize if the token has expired.
+
+    **Check the circuit breaker.** Hit `GET /api/health/services` to see if the Jobber circuit breaker is open. If so, wait for the reset timeout (default 60 seconds) or investigate the root cause.
+
+    **Check the custom field.** Verify `JOBBER_CUSTOM_FIELD_XN_NUMBER_ID` matches the actual custom field in Jobber.
+  </Accordion>
+
+  <Accordion title="Attachments not appearing on Jobber jobs">
+    **Check Supabase Storage.** Attachments are staged in Supabase Storage before upload. Verify the storage bucket exists and has appropriate permissions.
+
+    **Check attachment status.** Query the `work_order_attachments` table for entries with `failed` status.
+
+    **Retry failed attachments.** Use `POST /api/pipeline/retry` to re-process work orders with failed attachment uploads.
+  </Accordion>
+
+  <Accordion title="Webhook events not being received">
+    **Verify the webhook URL** is correctly registered in the Jobber developer portal.
+
+    **Check HMAC verification.** If the webhook secret is incorrect, all events are rejected with 401. The secret is derived from `JOBBER_CLIENT_SECRET`.
+
+    **Check Sentry** for webhook handler errors.
+  </Accordion>
+
+  <Accordion title="Rate limit errors on cron endpoint">
+    The sync endpoint enforces a 60-second rate limit. If you see rate limit errors, check that:
+    - The cron scheduler isn't firing more frequently than every 60 seconds
+    - Manual syncs aren't overlapping with scheduled syncs
+  </Accordion>
+</AccordionGroup>
+
+## Retry failed operations
+
+### Single work order
+
+```bash
+curl -X POST https://your-app.vercel.app/api/pipeline/retry \
+  -H "Authorization: Bearer your-cron-secret" \
+  -H "Content-Type: application/json" \
+  -d '{"workOrderId": "WO-12345"}'
+```
+
+### All failed work orders
+
+```bash
+curl -X POST https://your-app.vercel.app/api/pipeline/retry-all \
+  -H "Authorization: Bearer your-cron-secret"
+```
+
+## Monitoring
+
+Check [monitoring](/deployment/monitoring) for health endpoints and Sentry alerting configuration.

@@ -1,0 +1,51 @@
+---
+title: "Upload and parsing"
+description: "Upload receipts from BILL platform exports and parse document formats."
+---
+
+## Supported formats
+
+| Format | Source | Handler |
+|--------|--------|---------|
+| XLSX | BILL platform export | `xlsx` library |
+| PDF | Scanned or digital receipts | `lib/document-parser.ts` |
+
+## Upload process
+
+The upload interface at `/receipt-analysis` uses a drag-and-drop zone (`react-dropzone`) for file uploads.
+
+<Steps>
+  <Step title="Select files">
+    Drag files into the upload zone or click to browse. Multiple files can be uploaded at once.
+  </Step>
+  <Step title="Upload to storage">
+    Files are uploaded to Supabase Storage via `lib/document-storage.ts`. A receipt record is created in the `receipts` table with status `pending`.
+  </Step>
+  <Step title="Trigger processing">
+    After upload, call the processing endpoint to extract line items:
+
+    ```
+    POST /api/receipt-analysis/process
+    ```
+  </Step>
+</Steps>
+
+## Document parsing
+
+The document parser (`lib/document-parser.ts`) handles format-specific extraction:
+
+- **XLSX files**: Parsed using the `xlsx` library. The parser identifies header rows, data rows, and totals based on structural patterns in BILL exports.
+- **PDF files**: Processed by the AI extractor which reads the document visually and extracts structured data.
+
+## Automatic sync
+
+The receipt sync cron job (`POST /api/cron/receipt-sync`) polls for new receipts hourly. This handles cases where receipts are added programmatically rather than through the upload UI.
+
+## API endpoints
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/receipt-analysis/upload` | POST | Upload receipt files |
+| `/api/receipt-analysis/process` | POST | Trigger extraction pipeline |
+| `/api/receipt-analysis/receipts` | GET | List all receipts |
+| `/api/receipt-analysis/receipts/[id]` | GET | Get receipt detail with extraction data |

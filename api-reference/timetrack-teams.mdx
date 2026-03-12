@@ -1,0 +1,212 @@
+---
+title: "TimeTrack Teams integration"
+description: "Teams bot configuration, user management, and notification endpoints."
+---
+
+## `GET /api/timetrack/teams/status`
+
+Teams bot setup status and registration count.
+
+**Auth**: Session (admin only).
+
+**Response** `200`
+```json
+{
+  "configured": true,
+  "botId": "bot-abc123",
+  "registeredUsers": 15,
+  "lastActivity": "2025-01-15T10:30:00Z"
+}
+```
+
+---
+
+## `GET /api/timetrack/teams/settings`
+
+Feature gate configuration for Teams notifications.
+
+**Auth**: Session (admin only).
+
+**Response** `200`
+```json
+{
+  "settings": [
+    { "feature_key": "approval_reminders", "enabled": true },
+    { "feature_key": "sync_failure_alerts", "enabled": true },
+    { "feature_key": "weekly_digest", "enabled": false }
+  ]
+}
+```
+
+---
+
+## `PATCH /api/timetrack/teams/settings`
+
+Toggle a Teams notification feature flag.
+
+**Auth**: Session (admin only).
+
+<ParamField body="feature_key" type="string" required>
+  The feature to toggle.
+</ParamField>
+
+<ParamField body="enabled" type="boolean" required>
+  Enable or disable the feature.
+</ParamField>
+
+**Response** `200`
+```json
+{
+  "success": true,
+  "feature_key": "weekly_digest",
+  "enabled": true
+}
+```
+
+---
+
+## `GET /api/timetrack/teams/queue-stats`
+
+Notification queue statistics.
+
+**Auth**: Session (admin only).
+
+**Response** `200`
+```json
+{
+  "stats": [
+    { "status": "pending", "count": 5 },
+    { "status": "sent", "count": 1230 },
+    { "status": "failed", "count": 2 }
+  ]
+}
+```
+
+---
+
+## `POST /api/timetrack/teams/test-notification`
+
+Queue a test notification for verification.
+
+**Auth**: Session (admin only).
+
+<ParamField body="userEmail" type="string" required>
+  Target user email, or `"self"` for the current user.
+</ParamField>
+
+<ParamField body="notificationType" type="string" required>
+  Type of test notification to send.
+</ParamField>
+
+**Response** `200`
+```json
+{
+  "success": true,
+  "userEmail": "user@example.com",
+  "notificationType": "approval_reminder"
+}
+```
+
+---
+
+## `GET /api/timetrack/teams/users`
+
+List all Teams conversation references.
+
+**Auth**: Session (admin only).
+
+**Response** `200`
+```json
+{
+  "users": [
+    { "email": "user@example.com", "name": "Jane Smith", "registeredAt": "2025-01-10" }
+  ]
+}
+```
+
+---
+
+## `PATCH /api/timetrack/teams/users/[email]`
+
+Update a user's notification preferences.
+
+**Auth**: Session (admin only).
+
+<ParamField body="preferences" type="object" required>
+  Map of notification type to enabled/disabled.
+</ParamField>
+
+**Response** `200`
+```json
+{
+  "success": true,
+  "email": "user@example.com",
+  "preferences": { "approval_reminders": true, "weekly_digest": false }
+}
+```
+
+---
+
+## `DELETE /api/timetrack/teams/users/[email]`
+
+Remove a Teams conversation reference.
+
+**Auth**: Session (admin only).
+
+**Response** `200`
+```json
+{
+  "success": true,
+  "email": "user@example.com"
+}
+```
+
+---
+
+## `POST /api/timetrack/teams/reclassify`
+
+Override an entry's classification via Teams bot action.
+
+**Auth**: Session (admin or approver). Feature-gated.
+
+<ParamField body="entryId" type="string" required>
+  Time entry to reclassify.
+</ParamField>
+
+<ParamField body="isBillable" type="boolean" required>
+  New billability classification.
+</ParamField>
+
+<ParamField body="category" type="string" required>
+  New category assignment.
+</ParamField>
+
+<ParamField body="overrideReason" type="string" required>
+  Reason for the override.
+</ParamField>
+
+**Response** `200`
+```json
+{
+  "success": true,
+  "entryId": "entry-123",
+  "isBillable": true,
+  "category": "maintenance"
+}
+```
+
+---
+
+## `POST /api/timetrack/teams/retry-failed`
+
+Reset failed notifications in the queue for retry.
+
+**Auth**: Session (admin only).
+
+**Response** `200`
+```json
+{
+  "success": true,
+  "resetCount": 3
+}
+```

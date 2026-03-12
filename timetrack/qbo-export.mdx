@@ -1,0 +1,61 @@
+---
+title: "QuickBooks export"
+description: "Batch export of approved time entries to QuickBooks Online."
+---
+
+The export generator (`lib/export-generator.ts`) creates QuickBooks-compatible batches from approved time entries. Only entries with no blocking flags and a valid billing amount are included.
+
+<Note>
+  QuickBooks integration is optional. Set `QBO_CLIENT_ID`, `QBO_CLIENT_SECRET`, and `QBO_REDIRECT_URI` to enable it. See [environment variables](/environment-variables).
+</Note>
+
+## Export flow
+
+<Steps>
+  <Step title="Preview">
+    Before exporting, use the preview endpoint to see what will be included:
+
+    ```
+    GET /api/timetrack/export/preview
+    ```
+
+    The preview shows entry counts, total hours, total amounts, and any entries excluded due to blocking flags.
+  </Step>
+  <Step title="Validation">
+    The export validator (`lib/export-validator.ts`) checks:
+    - All entries have resolved blocking flags
+    - All entries have a valid billing amount
+    - All entries have a GL code assigned
+    - No duplicate exports (entries already exported are excluded)
+  </Step>
+  <Step title="Batch generation">
+    Approved entries are grouped by client and formatted as QuickBooks time activities. Each line item includes:
+    - Employee name
+    - Client name
+    - Hours worked
+    - Hourly rate and total amount
+    - GL code
+    - Description
+  </Step>
+  <Step title="Send to QuickBooks">
+    The batch is sent to the QuickBooks Online API via `lib/qbo-client.ts`. Entries are marked as `exported` in the database after successful delivery.
+  </Step>
+</Steps>
+
+## API endpoints
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/timetrack/export` | POST | Generate and send export batch |
+| `/api/timetrack/export/preview` | GET | Preview export contents without sending |
+
+## Access control
+
+Export functionality is restricted to the `admin` role. The export page at `/timetrack/export` is only accessible to admins.
+
+## Error handling
+
+If the QuickBooks API rejects part of a batch:
+- Successfully exported entries are marked as exported
+- Failed entries retain their current status and can be retried
+- Errors are logged to Sentry with the QBO error response

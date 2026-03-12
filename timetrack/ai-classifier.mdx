@@ -1,0 +1,76 @@
+---
+title: "AI classifier"
+description: "Anthropic Claude-powered billability classification for time entries."
+---
+
+The AI classifier (`lib/ai-classifier.ts`) uses Anthropic Claude to determine whether each time entry is billable or non-billable. It analyzes the entry description, task context, and user patterns to make a classification decision with a confidence score.
+
+## How it works
+
+<Steps>
+  <Step title="Build context">
+    The classifier assembles context for each entry:
+    - Entry description and duration
+    - Task name and list/space
+    - User's role and department
+    - Client information
+    - Historical classification patterns
+  </Step>
+  <Step title="Consult decision catalogue">
+    The decision catalogue (`lib/decision-catalogue.ts`) provides a decision tree of classification rules. This guides the AI with company-specific billing policies.
+  </Step>
+  <Step title="Classify with Claude">
+    The assembled context is sent to the Anthropic API. Claude returns:
+    - **Classification**: billable or non-billable
+    - **Confidence score**: 0.0 to 1.0
+    - **Reasoning**: explanation of the decision
+    - **Flags**: any quality concerns detected
+  </Step>
+  <Step title="Apply flags">
+    Based on the classification result and detected patterns, flags are attached to the entry. See [flag types](/timetrack/flags) for the full list.
+  </Step>
+</Steps>
+
+## API endpoints
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/timetrack/classify` | POST | Classify a single time entry |
+| `/api/timetrack/classify/stream` | GET | Stream classification results for batch processing |
+
+## Decision catalogue
+
+The decision catalogue (`lib/decision-catalogue.ts`) encodes company-specific billing rules as a decision tree. The AI uses this catalogue to make consistent decisions aligned with business policy.
+
+The catalogue covers:
+- Which task types are billable vs. non-billable
+- Client-specific billing exceptions
+- After-hours work rules
+- Personal time detection patterns
+- Multi-client entry handling
+
+## Keyword context
+
+The keyword context module (`lib/keyword-context.ts`) provides semantic patterns for classification:
+- **Personal space detection** (`lib/personal-space-detector.ts`): identifies entries logged against personal or internal spaces that shouldn't be billed to clients
+- **Kitchen sink detection** (`lib/kitchen-sink-detector.ts`): identifies entries that span multiple clients and need to be split
+
+## Confidence thresholds
+
+| Confidence | Action |
+|------------|--------|
+| 0.8 - 1.0 | Classification accepted automatically |
+| 0.5 - 0.8 | `low_ai_confidence` flag added, routed for review |
+| Below 0.5 | `ai_error` flag added, requires manual classification |
+
+## Performance metrics
+
+The accuracy dashboard at `/timetrack/admin/accuracy` tracks:
+- Classification accuracy over time
+- Confidence score distribution
+- Flag frequency by type
+- Override rates (how often humans change the AI's decision)
+
+## Cost management
+
+Classifications use the Anthropic API which has per-token costs. The classifier uses batch processing and context caching to minimize API calls.

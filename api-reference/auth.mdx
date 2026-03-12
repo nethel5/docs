@@ -1,0 +1,96 @@
+---
+title: "Auth endpoints"
+description: "OAuth flows for Azure AD, Jobber, ClickUp, and QuickBooks."
+---
+
+## `GET|POST /api/auth/[...nextauth]`
+
+NextAuth.js catch-all handler. Manages Azure AD login, session management, and token refresh.
+
+<Info>This endpoint is handled entirely by NextAuth.js. See [authentication](/auth/overview) for the flow.</Info>
+
+---
+
+## `GET /api/auth/jobber`
+
+Initiate the Jobber OAuth flow. Returns an authorization URL.
+
+<ParamField header="Authorization" type="string" required>
+  NextAuth session cookie. Must be an admin user.
+</ParamField>
+
+**Response** `200`
+```json
+{
+  "url": "https://api.getjobber.com/api/oauth/authorize?...",
+  "state": "csrf-token"
+}
+```
+
+---
+
+## `GET /api/auth/jobber/callback`
+
+OAuth callback handler. Exchanges the authorization code for tokens and stores them.
+
+<ParamField query="code" type="string" required>
+  Authorization code from Jobber.
+</ParamField>
+
+<ParamField query="state" type="string" required>
+  CSRF state token for verification.
+</ParamField>
+
+**Response**: HTML `postMessage` to close the OAuth popup window.
+
+---
+
+## `GET /api/auth/clickup`
+
+Initiate the ClickUp OAuth flow.
+
+<ParamField header="Authorization" type="string" required>
+  NextAuth session cookie. Must be an admin user.
+</ParamField>
+
+**Response** `200`
+```json
+{
+  "connected": false,
+  "authUrl": "https://app.clickup.com/api?client_id=..."
+}
+```
+
+---
+
+## `GET /api/auth/clickup/callback`
+
+OAuth callback handler for ClickUp. Validates the CSRF state, exchanges the code, and redirects.
+
+**Response**: Redirect to `/timetrack/settings`.
+
+---
+
+## `GET /api/auth/qbo`
+
+Initiate the QuickBooks Online OAuth flow.
+
+<ParamField header="Authorization" type="string" required>
+  NextAuth session cookie. Must be an admin user.
+</ParamField>
+
+**Response** `200`
+```json
+{
+  "connected": true,
+  "authUrl": "https://appcenter.intuit.com/connect/oauth2?..."
+}
+```
+
+---
+
+## `GET /api/auth/qbo/callback`
+
+OAuth callback handler for QuickBooks. Handles the `realmId` for company identification.
+
+**Response**: Redirect to `/timetrack/settings`.

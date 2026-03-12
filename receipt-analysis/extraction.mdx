@@ -1,0 +1,44 @@
+---
+title: "AI extraction"
+description: "Claude-powered line item extraction with confidence scoring."
+---
+
+The receipt extractor (`lib/receipt-extractor.ts`) uses Anthropic Claude to parse uploaded documents and extract structured line item data.
+
+## What gets extracted
+
+For each line item, the extractor identifies:
+
+| Field | Description |
+|-------|-------------|
+| Description | Product or service description |
+| Quantity | Number of units |
+| Unit price | Price per unit |
+| Total | Line item total |
+| UPC | Universal Product Code (if visible) |
+| Vendor | Vendor/supplier name |
+| Category | Product category (when identifiable) |
+
+## Confidence scoring
+
+Each extracted item receives a confidence score from 0.0 to 1.0:
+
+| Confidence | Interpretation | Action |
+|------------|---------------|--------|
+| 0.9 - 1.0 | High confidence | Accepted automatically |
+| 0.7 - 0.9 | Medium confidence | Accepted with review flag |
+| Below 0.7 | Low confidence | Requires manual review |
+
+Low-confidence items appear highlighted in the items view at `/receipt-analysis/items`.
+
+## Raw extraction view
+
+The receipt detail page at `/receipt-analysis/receipts/[id]` shows:
+- The original document
+- Raw extraction output from Claude
+- Structured line items with confidence scores
+- Manual correction interface for low-confidence items
+
+## Error handling
+
+If extraction fails (API error, unreadable document), the receipt status is set to `failed` with an error message. Failed receipts can be re-processed by calling the process endpoint again.

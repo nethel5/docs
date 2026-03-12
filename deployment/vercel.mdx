@@ -1,0 +1,53 @@
+---
+title: "Vercel deployment"
+description: "Deploy MVSoftware to Vercel with environment configuration and security headers."
+---
+
+MVSoftware deploys to Vercel as a standard Next.js application. The deployment process is managed through GitHub Actions in `.github/workflows/deploy.yml`.
+
+## Build process
+
+```bash
+npm run validate    # Type check + linting
+npm run build       # Next.js production build
+npm start           # Start production server on :3000
+```
+
+The build captures the git commit SHA at build time via `NEXT_PUBLIC_GIT_COMMIT` for version tracking in the UI.
+
+## Environment configuration
+
+Set all [environment variables](/environment-variables) in the Vercel dashboard under Project Settings > Environment Variables.
+
+<Warning>
+  Ensure `NEXTAUTH_URL` is set to your production domain (not `localhost`) in the Vercel environment.
+</Warning>
+
+Key production overrides:
+- `NEXTAUTH_URL` → your production URL
+- `QBO_ENVIRONMENT` → `production`
+- All `REDIRECT_URI` values → production callback URLs
+- `SENTRY_DSN` and `SENTRY_AUTH_TOKEN` → production Sentry project
+
+## Security headers
+
+The `next.config.ts` automatically applies these security headers in production:
+
+| Header | Value |
+|--------|-------|
+| `X-Content-Type-Options` | `nosniff` |
+| `X-Frame-Options` | `DENY` |
+| `Referrer-Policy` | `strict-origin-when-cross-origin` |
+| `Permissions-Policy` | `camera=(), microphone=(), geolocation=()` |
+| `Strict-Transport-Security` | `max-age=63072000; includeSubDomains` (production only) |
+
+## CI/CD
+
+The GitHub Actions workflow runs:
+1. `npm run validate` — type checking and linting (fails the build on errors)
+2. `npm run build` — Next.js production build with `CI=true` (enforces ESLint and TypeScript errors)
+3. Deploy to Vercel
+
+<Note>
+  In local builds, ESLint and TypeScript errors are warnings. In CI (when `CI=true`), they are enforced as errors.
+</Note>

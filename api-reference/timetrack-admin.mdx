@@ -1,0 +1,132 @@
+---
+title: "TimeTrack admin"
+description: "Admin endpoints for accuracy metrics, recalculation, and AI learning."
+---
+
+## `GET /api/timetrack/admin/accuracy`
+
+AI classification accuracy metrics with override history.
+
+**Auth**: Session (admin only).
+
+<ParamField query="days" type="number" default="84">
+  Number of days of accuracy data.
+</ParamField>
+
+**Response** `200`
+```json
+{
+  "summary": {
+    "totalClassified": 2500,
+    "correct": 2350,
+    "overridden": 150,
+    "accuracy": 0.94
+  },
+  "byClient": [
+    { "clientId": "client-456", "clientName": "Mountain View HOA", "accuracy": 0.96 }
+  ],
+  "byCategory": [
+    { "category": "maintenance", "accuracy": 0.97 },
+    { "category": "admin", "accuracy": 0.88 }
+  ],
+  "recentOverrides": [
+    { "entryId": "entry-123", "original": "non_billable", "corrected": "billable", "reason": "Client-specific exception" }
+  ]
+}
+```
+
+---
+
+## `POST /api/timetrack/admin/recalculate-amounts`
+
+Batch recalculate billing amounts for entries with null amounts.
+
+**Auth**: Session (admin only).
+
+**Response** `200`
+```json
+{
+  "success": true,
+  "total": 50,
+  "processed": 48,
+  "skipped": 2,
+  "errors": []
+}
+```
+
+---
+
+## `GET /api/timetrack/ai-learning/accuracy`
+
+Weekly accuracy trend data.
+
+**Auth**: Session (admin or approver).
+
+<ParamField query="weeks" type="number" default="12">
+  Number of weeks of trend data.
+</ParamField>
+
+<ParamField query="spaceId" type="string">
+  Optional filter to a specific ClickUp space.
+</ParamField>
+
+**Response** `200`
+```json
+{
+  "data": [
+    { "week": "2025-W03", "total": 200, "correct": 190, "accuracy": 0.95 }
+  ]
+}
+```
+
+---
+
+## `GET /api/timetrack/ai-learning/costs`
+
+Current month Anthropic API usage costs.
+
+**Auth**: Session (admin only).
+
+**Response** `200`
+```json
+{
+  "totalCostUsd": 42.50,
+  "byModel": [
+    { "model": "claude-sonnet-4-5-20250514", "calls": 1200, "costUsd": 42.50 }
+  ]
+}
+```
+
+---
+
+## `GET /api/timetrack/ai-learning/patterns`
+
+User override patterns to identify systematic AI failures.
+
+**Auth**: Session (admin or approver).
+
+<ParamField query="minOccurrences" type="number" default="3">
+  Minimum number of overrides to include a pattern.
+</ParamField>
+
+<ParamField query="startDate" type="string">
+  Filter start date (ISO 8601).
+</ParamField>
+
+<ParamField query="endDate" type="string">
+  Filter end date (ISO 8601).
+</ParamField>
+
+**Response** `200`
+```json
+{
+  "patterns": [
+    {
+      "description": "Irrigation entries in Space X misclassified as non-billable",
+      "occurrences": 12,
+      "originalClassification": "non_billable",
+      "correctedTo": "billable"
+    }
+  ]
+}
+```

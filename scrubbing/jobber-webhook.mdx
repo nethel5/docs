@@ -1,0 +1,33 @@
+---
+title: "Jobber webhook"
+description: "Jobber webhook integration for automated status updates."
+---
+
+The scrubbing webhook handler (`lib/scrubbing-webhook.ts`) processes Jobber webhook events and updates scrubbing job statuses accordingly.
+
+## Event flow
+
+When a job status changes in Jobber:
+
+<Steps>
+  <Step title="Webhook received">
+    Jobber sends a POST request to `/api/webhooks/jobber` with the job status change event.
+  </Step>
+  <Step title="Signature verification">
+    The webhook handler verifies the HMAC-SHA256 signature to ensure the event is authentic. See [webhooks](/vantaca-jobber/webhooks) for details.
+  </Step>
+  <Step title="Job lookup">
+    The handler looks up the scrubbing job by Jobber ID in the `scrubbing_jobs` table.
+  </Step>
+  <Step title="Status update">
+    If the Jobber status change maps to a scrubbing transition, the job status is updated and a `system` comment is created.
+  </Step>
+</Steps>
+
+## Jobber-to-scrubbing mapping
+
+The webhook handler maps Jobber job statuses to scrubbing workflow statuses. For example, when a Jobber job is marked as "completed" in the field, the corresponding scrubbing job transitions to `needs_scrubbing`.
+
+## Shared webhook endpoint
+
+The scrubbing module shares the `/api/webhooks/jobber` endpoint with the Vantaca-Jobber sync module. The webhook handler routes events to the appropriate module based on the event type and job context.

@@ -1,0 +1,44 @@
+---
+title: "Transitions"
+description: "Valid status transitions and the actions that trigger them."
+---
+
+## Actions
+
+Each transition is triggered by a named action:
+
+| Action | Description | Typical transition |
+|--------|-------------|-------------------|
+| `claim` | Scrubber claims a job for review | `needs_scrubbing` → `scrubbing` |
+| `submit_for_review` | Scrubber submits completed review | `scrubbing` → `ready_for_review` |
+| `resubmit_for_review` | Scrubber resubmits after corrections | `changes_required` → `ready_for_review` |
+| `return_to_scrubbing` | Reviewer returns job for corrections | `ready_for_review` → `changes_required` |
+| `approve_client` | Client approves charges | `client_approval` → `ready_to_bill` |
+| `add_comment` | Add a note without changing status | Any status |
+| `dismiss_reopened` | Dismiss a reopened notification | Various |
+| `archive` | Archive without invoicing | Any active status → `archived` |
+| `recurring_no_extras` | Recurring job has no extras | `recurring_review` → `ready_to_bill` |
+| `recurring_extras_found` | Recurring job has extras to review | `recurring_review` → `scrubbing` |
+| `move_to_action_required` | Flag job as needing attention | Various → `action_required` |
+| `resolve_new_expenses` | Resolve newly added expenses | `action_required` → `needs_scrubbing` |
+
+## Transition rules
+
+Not all transitions are valid from every status. The scrubbing module enforces:
+- Jobs can only be claimed from `needs_scrubbing`
+- Reviews can only be submitted from `scrubbing`
+- Client approval can only be granted from `client_approval`
+- Only terminal statuses (`invoiced`, `archived`) end the workflow
+
+Invalid transitions are rejected with an error explaining the current status and available actions.
+
+## Comment types
+
+Every transition creates a comment record in the `scrubbing_comments` table:
+
+| Type | Description |
+|------|-------------|
+| `note` | Free-text comment added by a user |
+| `review` | Review feedback from a reviewer |
+| `status_change` | Automatic record of a status transition |
+| `system` | System-generated notification (webhook, reconciliation) |

@@ -1,0 +1,45 @@
+---
+title: "Settings"
+description: "Admin configuration for the TimeTrack module."
+---
+
+The settings page at `/timetrack/settings` is restricted to the `admin` role. It provides configuration options for the TimeTrack module.
+
+## Available settings
+
+### Sync configuration
+
+- ClickUp spaces and lists to poll for time entries
+- Sync frequency and polling intervals
+- User mapping between ClickUp and Azure AD
+
+### Billing configuration
+
+- Default billing rates
+- Client-specific rate overrides
+- After-hours premium rate
+- Business timezone for hour calculations
+
+### Classification configuration
+
+- AI classifier model and parameters
+- Decision catalogue updates
+- Confidence thresholds for flag generation
+
+### Export configuration
+
+- QuickBooks connection status
+- GL code mappings
+- Default export filters
+
+## Remediation
+
+The remediation page at `/timetrack/remediation` provides an error correction interface for:
+- Bulk flag resolution
+- Client reassignment
+- Rate correction and recalculation
+- Re-classification of incorrectly classified entries
+
+## Server actions
+
+UI operations on the settings and configuration pages use Next.js server actions defined in `lib/timetrack-actions.ts`. These handle form submissions, data updates, and real-time validation.

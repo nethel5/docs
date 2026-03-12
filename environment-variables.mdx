@@ -1,0 +1,186 @@
+---
+title: "Environment variables"
+description: "Complete reference for all MVSoftware environment variables, grouped by module."
+---
+
+Copy `.env.example` to `.env.local` and fill in your values. Never commit `.env.local` to version control.
+
+## Core
+
+Required for all functionality.
+
+<ResponseField name="NEXT_PUBLIC_SUPABASE_URL" type="string" required>
+  Supabase project URL. Format: `https://[project-ref].supabase.co`
+</ResponseField>
+
+<ResponseField name="NEXT_PUBLIC_SUPABASE_ANON_KEY" type="string" required>
+  Supabase public API key for client-side operations.
+</ResponseField>
+
+<ResponseField name="SUPABASE_SERVICE_KEY" type="string" required>
+  Supabase admin key for server-side operations. Has full database access.
+</ResponseField>
+
+<ResponseField name="NEXTAUTH_URL" type="string" required>
+  Base URL for authentication callbacks. Set to `http://localhost:3000` in development.
+</ResponseField>
+
+<ResponseField name="NEXTAUTH_SECRET" type="string" required>
+  Secret for signing session tokens. Generate with `openssl rand -base64 32`.
+</ResponseField>
+
+<ResponseField name="CRON_SECRET" type="string" required>
+  Bearer token for authenticating scheduled endpoint calls. Generate with `openssl rand -hex 32`.
+</ResponseField>
+
+## Vantaca-Jobber sync
+
+Required for the work order synchronization module.
+
+<ResponseField name="VANTACA_API_URL" type="string" required>
+  Vantaca REST API base URL. Default: `https://api.vantaca.net`
+</ResponseField>
+
+<ResponseField name="VANTACA_COMPANY_ID" type="string" required>
+  Vantaca company identifier.
+</ResponseField>
+
+<ResponseField name="VANTACA_USER_ID" type="string" required>
+  Vantaca API user ID.
+</ResponseField>
+
+<ResponseField name="VANTACA_PASSWORD" type="string" required>
+  Vantaca API password.
+</ResponseField>
+
+<ResponseField name="JOBBER_CLIENT_ID" type="string" required>
+  Jobber OAuth application client ID.
+</ResponseField>
+
+<ResponseField name="JOBBER_CLIENT_SECRET" type="string" required>
+  Jobber OAuth application client secret.
+</ResponseField>
+
+<ResponseField name="JOBBER_REDIRECT_URI" type="string" required>
+  Jobber OAuth callback URL. Set to `http://localhost:3000/api/auth/jobber/callback` in development.
+</ResponseField>
+
+<ResponseField name="JOBBER_CUSTOM_FIELD_XN_NUMBER_ID" type="string" required>
+  Base64-encoded GraphQL ID of the Jobber custom field used to store the Vantaca XN number for cross-system tracking.
+</ResponseField>
+
+## TimeTrack
+
+Required for time tracking, AI classification, and billing features.
+
+### Azure AD
+
+<ResponseField name="AZURE_AD_CLIENT_ID" type="string" required>
+  Azure AD app registration client ID.
+</ResponseField>
+
+<ResponseField name="AZURE_AD_CLIENT_SECRET" type="string" required>
+  Azure AD app registration client secret.
+</ResponseField>
+
+<ResponseField name="AZURE_AD_TENANT_ID" type="string" required>
+  Azure AD tenant identifier.
+</ResponseField>
+
+<ResponseField name="MV_ACCOUNTING_GROUP_ID" type="string" required>
+  Azure AD group object ID. Members of this group receive the `approver` role for scrubbing and time entry review.
+</ResponseField>
+
+### ClickUp
+
+<ResponseField name="CLICKUP_CLIENT_ID" type="string" required>
+  ClickUp OAuth application client ID.
+</ResponseField>
+
+<ResponseField name="CLICKUP_CLIENT_SECRET" type="string" required>
+  ClickUp OAuth application client secret.
+</ResponseField>
+
+<ResponseField name="CLICKUP_REDIRECT_URI" type="string" required>
+  ClickUp OAuth callback URL. Set to `http://localhost:3000/api/auth/clickup/callback` in development.
+</ResponseField>
+
+### AI services
+
+<ResponseField name="ANTHROPIC_API_KEY" type="string" required>
+  Anthropic API key for Claude-powered billability classification. Format: `sk-ant-...`
+</ResponseField>
+
+<ResponseField name="VOYAGE_API_KEY" type="string">
+  Voyage AI API key for RAG embeddings and semantic search. Required for the reports module.
+</ResponseField>
+
+### QuickBooks Online
+
+<Note>QBO features are disabled when these variables are unset.</Note>
+
+<ResponseField name="QBO_CLIENT_ID" type="string">
+  QuickBooks Online OAuth client ID from the [Intuit Developer Dashboard](https://developer.intuit.com/app/developer/dashboard).
+</ResponseField>
+
+<ResponseField name="QBO_CLIENT_SECRET" type="string">
+  QuickBooks Online OAuth client secret.
+</ResponseField>
+
+<ResponseField name="QBO_REDIRECT_URI" type="string">
+  QBO OAuth callback URL. Set to `http://localhost:3000/api/auth/qbo/callback` in development.
+</ResponseField>
+
+<ResponseField name="QBO_ENVIRONMENT" type="string" default="sandbox">
+  QBO environment. Set to `production` for live data.
+</ResponseField>
+
+### Other
+
+<ResponseField name="BUSINESS_TIMEZONE" type="string" default="America/Denver">
+  Timezone for billing calculations, after-hours detection, and report generation.
+</ResponseField>
+
+## Teams bot
+
+Required for Microsoft Teams notification integration.
+
+<ResponseField name="TEAMS_BOT_ID" type="string" required>
+  Bot Framework registration ID.
+</ResponseField>
+
+<ResponseField name="TEAMS_BOT_PASSWORD" type="string" required>
+  Bot Framework registration password.
+</ResponseField>
+
+<ResponseField name="TEAMS_BOT_TENANT_ID" type="string" required>
+  Azure AD tenant for the bot registration.
+</ResponseField>
+
+<ResponseField name="TEAMS_APP_ID" type="string">
+  Teams app registration ID for deep-link and install features.
+</ResponseField>
+
+## Monitoring
+
+Recommended for production deployments.
+
+<ResponseField name="SENTRY_DSN" type="string">
+  Sentry Data Source Name for error tracking.
+</ResponseField>
+
+<ResponseField name="SENTRY_AUTH_TOKEN" type="string">
+  Sentry auth token for uploading source maps during build.
+</ResponseField>
+
+## Testing
+
+For non-production environments only.
+
+<ResponseField name="E2E_TEST_SECRET" type="string">
+  Shared secret for E2E authentication bypass. Generate with `openssl rand -hex 16`.
+</ResponseField>
+
+<ResponseField name="PLAYWRIGHT_BASE_URL" type="string" default="http://localhost:3000">
+  Override the base URL for Playwright E2E tests.
+</ResponseField>

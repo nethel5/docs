@@ -1,0 +1,53 @@
+---
+title: "Export validation"
+description: "Pre-export checks that ensure data quality before sending to QuickBooks."
+---
+
+The export validator (`lib/export-validator.ts`) runs a series of checks before generating a QuickBooks export batch. Entries that fail validation are excluded from the export.
+
+## Validation rules
+
+| Rule | Severity | Description |
+|------|----------|-------------|
+| No blocking flags | Error | Entries with unresolved blocking flags are excluded |
+| Valid amount | Error | Entries must have a calculated billing amount > 0 |
+| GL code assigned | Warning | Entries without a GL code use the default "uncategorized" code |
+| Not already exported | Error | Previously exported entries are excluded to prevent duplicates |
+| Client assigned | Error | Entries without a client assignment are excluded |
+| Rate configured | Error | Entries with `missing_rate` flag are excluded |
+
+## Validation response
+
+The validation step returns a summary:
+
+```json
+{
+  "valid": 142,
+  "excluded": 8,
+  "warnings": 3,
+  "exclusionReasons": {
+    "blocking_flags": 4,
+    "missing_amount": 2,
+    "already_exported": 1,
+    "missing_client": 1
+  }
+}
+```
+
+## Preview before export
+
+Always use the preview endpoint before exporting:
+
+```
+GET /api/timetrack/export/preview
+```
+
+The preview runs validation and returns the full list of entries that will be included and excluded, with reasons. This lets you resolve issues before committing to the export.
+
+## Blocking flags that prevent export
+
+These flags must be resolved before their entries can be exported:
+
+`missing_description`, `low_ai_confidence`, `incorrect_client`, `ai_error`, `personal_space`, `missing_rate`, `missing_client`, `capital_project_unmatched`, `after_hours`, `kitchen_sink`
+
+See [flag types](/timetrack/flags) for details on each flag and how to resolve them.

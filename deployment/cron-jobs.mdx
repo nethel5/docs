@@ -1,0 +1,72 @@
+---
+title: "Cron jobs"
+description: "Scheduled tasks for syncing data, sending notifications, and maintaining data integrity."
+---
+
+MVSoftware uses cron endpoints to run scheduled tasks. All cron endpoints require a bearer token matching `CRON_SECRET` for authentication.
+
+## Authentication
+
+Cron endpoints verify the `Authorization` header using `isCronAuthorized()` from `lib/cron-auth.ts`:
+
+```bash
+curl -X GET https://your-app.vercel.app/api/cron \
+  -H "Authorization: Bearer your-cron-secret"
+```
+
+## Scheduled endpoints
+
+| Endpoint | Method | Frequency | Description |
+|----------|--------|-----------|-------------|
+| `/api/cron` | GET | Every 5 min | Vantaca-Jobber work order sync |
+| `/api/cron` | POST | Manual | Manual sync trigger (accepts optional `reason` field) |
+| `/api/cron/receipt-sync` | POST | Hourly | Poll BILL platform for new receipts |
+| `/api/cron/scrubbing-reconciliation` | POST | Every 15 min | Reconcile scrubbing job statuses with Jobber |
+| `/api/cron/approval-escalation` | POST | Daily | Escalate overdue approval requests (3-day deadline) |
+| `/api/cron/daily-reminders` | POST | Daily | Send pending approval reminders via Teams |
+| `/api/cron/weekly-digest` | POST | Weekly | Generate and send summary reports |
+| `/api/cron/teams-notifications` | POST | Every minute | Deliver queued Teams bot notifications |
+
+## Rate limiting
+
+The main sync endpoint (`/api/cron`) enforces a 60-second rate limit between invocations to prevent overlapping syncs.
+
+## Health check
+
+The `HEAD /api/cron` endpoint returns a 200 status with an `X-Cron-Status: healthy` header for uptime monitoring.
+
+## Manual sync
+
+The POST endpoint on `/api/cron` triggers a manual sync with an optional reason for audit logging:
+
+```bash
+curl -X POST https://your-app.vercel.app/api/cron \
+  -H "Authorization: Bearer your-cron-secret" \
+  -H "Content-Type: application/json" \
+  -d '{"reason": "Re-syncing after Vantaca maintenance"}'
+```
+
+## Response format
+
+Sync endpoints return a summary of operations performed:
+
+```json
+{
+  "workOrdersProcessed": 42,
+  "workOrdersCreated": 3,
+  "workOrdersUpdated": 12,
+  "jobsCreated": 3,
+  "errors": [],
+  "trigger": "manual",
+  "reason": "Re-syncing after Vantaca maintenance"
+}
+```
+
+## Operation logging
+
+All cron runs are logged to Supabase via `saveOperationLog()` with:
+- `operation_type`: `"cron"`
+- `operation_name`: `"pipeline_sync"` or `"pipeline_manual_sync"`
+- Full result payload for audit trail
+
+Cron runs are also wrapped in Sentry spans for performance monitoring.

@@ -1,0 +1,105 @@
+---
+title: "TimeTrack sync"
+description: "ClickUp time entry sync and metadata endpoints."
+---
+
+## `POST /api/timetrack/sync`
+
+Trigger a manual time entry sync from ClickUp. Returns a streaming NDJSON response with progress events.
+
+**Auth**: Session (admin only).
+
+<ParamField body="startDate" type="string" required>
+  Start of the sync window (ISO 8601).
+</ParamField>
+
+<ParamField body="endDate" type="string" required>
+  End of the sync window (ISO 8601).
+</ParamField>
+
+<ParamField body="spaceIds" type="string[]">
+  Optional filter to specific ClickUp spaces.
+</ParamField>
+
+<ParamField body="autoClassify" type="boolean">
+  Run AI classification on synced entries automatically.
+</ParamField>
+
+**Response**: NDJSON stream with progress events:
+```json
+{"phase": "fetching", "progress": 0.3, "message": "Fetching page 3 of 10"}
+{"phase": "processing", "progress": 0.7, "message": "Processing 150 entries"}
+{"phase": "complete", "total": 150, "new": 42, "updated": 108}
+```
+
+---
+
+## `POST /api/timetrack/sync/entry`
+
+Re-sync a single time entry from ClickUp.
+
+**Auth**: Session (admin only).
+
+<ParamField body="clickupEntryId" type="string" required>
+  The ClickUp time entry ID to re-sync.
+</ParamField>
+
+**Response** `200`
+```json
+{
+  "success": true,
+  "processed": 1,
+  "errors": []
+}
+```
+
+---
+
+## `POST /api/timetrack/sync/spaces`
+
+Sync ClickUp spaces, folders, and lists metadata.
+
+**Auth**: Session (admin only).
+
+**Response** `200`
+```json
+{
+  "success": true,
+  "synced": 5,
+  "folders": 12,
+  "lists": 34
+}
+```
+
+---
+
+## `POST /api/timetrack/sync/users`
+
+Sync ClickUp team members to the employee rates table.
+
+**Auth**: Session (admin only).
+
+**Response** `200`
+```json
+{
+  "success": true,
+  "synced": 15,
+  "total": 15
+}
+```
+
+---
+
+## `GET /api/timetrack/sync/cron`
+
+Automated rolling 24-hour window sync. Called by the cron scheduler.
+
+**Auth**: Cron auth.
+
+**Response** `200`
+```json
+{
+  "success": true,
+  "result": { "new": 12, "updated": 45 }
+}
+```

@@ -1,0 +1,58 @@
+---
+title: "Flag types"
+description: "Quality flags that prevent export and route entries for review."
+---
+
+Flags are attached to time entries to indicate quality concerns. Entries with **blocking** flags cannot be exported to QuickBooks until the flag is resolved.
+
+## Flag reference
+
+| Flag type | Blocking | Description |
+|-----------|----------|-------------|
+| `missing_description` | Yes | Entry has no description text |
+| `low_ai_confidence` | Yes | AI classification confidence below 0.8 |
+| `no_matching_rule` | No | No decision catalogue rule matched |
+| `manual_review` | No | Manually flagged for human review |
+| `incorrect_client` | Yes | Client assignment appears wrong |
+| `incorrect_task_type` | Yes | Task type doesn't match the work described |
+| `duration_suspicious` | No | Duration is unusually long or short |
+| `ai_error` | Yes | AI classifier returned an error or confidence below 0.5 |
+| `personal_space` | Yes | Entry logged against a personal or internal space |
+| `sync_conflict` | No | Data conflict detected during ClickUp sync |
+| `missing_rate` | Yes | No billing rate found for this employee/client combination |
+| `missing_client` | Yes | No client assigned to the entry |
+| `capital_project_unmatched` | Yes | Entry tagged for capital project but no matching project found |
+| `after_hours` | Yes | Work performed outside business hours, requires approval for premium rate |
+| `kitchen_sink` | Yes | Entry spans multiple clients and needs to be split |
+| `other` | No | General-purpose flag for manual annotations |
+
+## Blocking vs. non-blocking
+
+**Blocking flags** prevent the entry from being included in QuickBooks exports. They must be resolved (with an optional resolution note) before the entry can proceed.
+
+**Non-blocking flags** are informational. They appear in the UI as warnings but don't prevent export.
+
+## Flag lifecycle
+
+<Steps>
+  <Step title="Creation">
+    Flags are created by the AI classifier, sync process, or manual review. Each flag records who created it and when.
+  </Step>
+  <Step title="Review">
+    Flagged entries appear in the approval queue at `/timetrack/approvals`. Approvers can review the flag details and the entry context.
+  </Step>
+  <Step title="Resolution">
+    To resolve a flag, the reviewer marks it as resolved with an optional `resolution_note` explaining the decision. The `resolved_by` field tracks who resolved it.
+  </Step>
+</Steps>
+
+## Flag detection
+
+| Detector | Flags generated |
+|----------|----------------|
+| AI classifier | `low_ai_confidence`, `ai_error`, `no_matching_rule`, `incorrect_client`, `incorrect_task_type` |
+| Personal space detector | `personal_space` |
+| Kitchen sink detector | `kitchen_sink` |
+| Sync process | `missing_description`, `missing_client`, `sync_conflict` |
+| Billability engine | `missing_rate`, `after_hours`, `duration_suspicious` |
+| Capital projects | `capital_project_unmatched` |

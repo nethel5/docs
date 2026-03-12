@@ -1,0 +1,44 @@
+---
+title: "Normalization"
+description: "Standardize extracted line items for consistent product matching."
+---
+
+The receipt normalizer (`lib/receipt-normalizer.ts`) standardizes extracted line items so they can be consistently matched across vendors and receipts.
+
+## Normalization steps
+
+<Steps>
+  <Step title="Description cleaning">
+    Remove vendor-specific formatting, abbreviations, and noise from product descriptions. Standardize common terms (e.g., "1/2 in." → "1/2 inch").
+  </Step>
+  <Step title="Unit normalization">
+    Convert units to a consistent format: "ea", "each", "1x" → "each"; "pk", "pack" → "pack"; etc.
+  </Step>
+  <Step title="Vendor identification">
+    Extract and standardize vendor names from receipt headers and metadata.
+  </Step>
+  <Step title="Category assignment">
+    Assign items to product categories from the taxonomy defined in `lib/stocking-categories.ts`.
+  </Step>
+</Steps>
+
+## Product matching
+
+After normalization, items are matched to canonical products using two methods:
+
+### UPC matching
+
+If a UPC code was extracted, the UPC resolver (`lib/upc-resolver.ts`) looks up the product in the canonical product library. This is the most reliable matching method.
+
+### Semantic matching
+
+When no UPC is available, the normalizer uses semantic similarity to find the best match in the product library. Items that can't be matched can be:
+- Manually matched to an existing product
+- Added as a new canonical product via the items interface
+
+## API endpoints
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/receipt-analysis/items/confirm-match` | POST | Confirm a product match |
+| `/api/receipt-analysis/items/create-canonical` | POST | Add a new canonical product |

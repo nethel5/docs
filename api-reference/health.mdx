@@ -1,0 +1,58 @@
+---
+title: "Health endpoints"
+description: "Application and per-service health monitoring."
+---
+
+## `GET /api/health`
+
+Public health check for load balancers and uptime monitors.
+
+**Auth**: None
+
+**Response** `200`
+```json
+{
+  "status": "healthy",
+  "timestamp": "2025-01-15T10:30:00Z",
+  "version": "abc1234"
+}
+```
+
+---
+
+## `GET /api/health/services`
+
+Detailed per-service health with circuit breaker stats.
+
+**Auth**: Session (admin-only shows full details)
+
+**Response** `200`
+```json
+{
+  "status": "healthy",
+  "services": [
+    {
+      "name": "vantaca",
+      "status": "healthy",
+      "circuitBreaker": {
+        "state": "closed",
+        "failures": 0,
+        "successes": 1523,
+        "totalRequests": 1523,
+        "lastSuccessTime": "2025-01-15T10:30:00Z",
+        "lastFailureTime": null
+      }
+    },
+    {
+      "name": "jobber",
+      "status": "healthy",
+      "circuitBreaker": {
+        "state": "closed",
+        "failures": 0,
+        "successes": 842,
+        "totalRequests": 842
+      }
+    }
+  ]
+}
+```

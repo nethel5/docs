@@ -1,0 +1,39 @@
+---
+title: "Bulk optimizer"
+description: "Batch pricing analysis across receipts for cost savings."
+---
+
+The bulk optimizer component at `/receipt-analysis` analyzes pricing across multiple receipts to identify cost-saving opportunities.
+
+## Features
+
+### Cross-receipt price comparison
+
+Compare the same product across multiple receipts and vendors to find:
+- The best per-unit price available
+- Volume discount opportunities
+- Vendor-specific pricing patterns
+
+### Batch analysis
+
+Upload multiple receipts at once and the optimizer:
+- Groups identical or similar items across receipts
+- Calculates total spend by product and vendor
+- Highlights items where switching vendors would save money
+- Estimates potential savings
+
+## API endpoint
+
+```
+POST /api/receipt-analysis/optimize
+```
+
+The optimize endpoint accepts filters for date range, vendor, and product category, and returns a report of pricing opportunities.
+
+## When to use
+
+Run the bulk optimizer:
+- After processing a batch of monthly receipts
+- When evaluating a new vendor relationship
+- During quarterly spend reviews
+- When stocking recommendations change significantly

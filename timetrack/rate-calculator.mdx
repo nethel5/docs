@@ -1,0 +1,45 @@
+---
+title: "Rate calculator"
+description: "Client-specific billing rates with overrides and time-based multipliers."
+---
+
+The rate calculator (`lib/rate-calculator.ts`) determines the hourly rate for each time entry based on employee, client, and temporal factors.
+
+## Rate resolution order
+
+The calculator checks rates in this priority order:
+
+1. **Employee-client override** — a specific rate for this employee working for this client
+2. **Client default rate** — the default rate for all employees working for this client
+3. **Employee default rate** — the default rate for this employee across all clients
+4. **Global default** — the system-wide fallback rate
+
+If no rate is found at any level, the entry receives a `missing_rate` flag.
+
+## Rate overrides
+
+Overrides are stored in the `employee_rates` table:
+
+| Column | Description |
+|--------|-------------|
+| `employee_id` | The employee this rate applies to (null for client defaults) |
+| `client_id` | The client this rate applies to (null for employee defaults) |
+| `hourly_rate` | The rate in dollars |
+| `effective_date` | When this rate takes effect |
+| `override_reason` | Why this override exists |
+
+Multiple rates can exist for the same employee/client combination with different effective dates. The calculator uses the most recent rate that is on or before the entry's date.
+
+## Time-based multipliers
+
+| Multiplier | Rate | Condition |
+|------------|------|-----------|
+| Standard | 1.0x | Work during business hours |
+| After-hours | $200/hr flat | Evenings and weekends |
+| Holiday | Configurable | Recognized holidays |
+
+After-hours detection uses the `BUSINESS_TIMEZONE` environment variable (default: `America/Denver`).
+
+## Client quotas
+
+The `client_quotas` table tracks budget and time limits per client. When a client approaches their quota, the dashboard displays a warning. Quotas are informational — they don't block time entry creation or export.

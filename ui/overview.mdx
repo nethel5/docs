@@ -1,0 +1,110 @@
+---
+title: "UI overview"
+description: "Component architecture, styling patterns, and design system foundations."
+---
+
+MVSoftware's UI is built on [shadcn/ui](https://ui.shadcn.com) with Radix UI primitives, styled with Tailwind CSS 4, and themed with CSS custom properties in the oklch color space.
+
+## Stack
+
+| Layer | Technology | Purpose |
+|-------|-----------|---------|
+| Primitives | Radix UI | Accessible, unstyled component primitives |
+| Components | shadcn/ui (New York style) | Pre-built, customizable components |
+| Styling | Tailwind CSS 4 | Utility-first CSS |
+| Variants | class-variance-authority (CVA) | Type-safe component variants |
+| Icons | Lucide React | 575+ consistent icons |
+| Charts | Recharts | Data visualization |
+| Forms | React Hook Form + Zod | Form management and validation |
+| Toasts | Sonner | Toast notifications |
+| Theme | next-themes | Light/dark/system theme switching |
+| Animations | tw-animate-css | CSS animation utilities |
+
+## Class utility
+
+All components use the `cn()` utility from `lib/utils.ts` for merging Tailwind classes:
+
+```typescript
+import { clsx, type ClassValue } from "clsx"
+import { twMerge } from "tailwind-merge"
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs))
+}
+```
+
+This prevents class conflicts when composing components with custom styles.
+
+## Component patterns
+
+### Variants with CVA
+
+Components use `class-variance-authority` for type-safe variant definitions:
+
+```typescript
+const buttonVariants = cva("inline-flex items-center ...", {
+  variants: {
+    variant: {
+      default: "bg-primary text-primary-foreground ...",
+      destructive: "bg-destructive text-white ...",
+      outline: "border bg-background ...",
+      secondary: "bg-secondary text-secondary-foreground ...",
+      ghost: "hover:bg-accent ...",
+      link: "text-primary underline-offset-4 ...",
+    },
+    size: {
+      default: "h-9 px-4 py-2",
+      sm: "h-8 rounded-md px-3",
+      lg: "h-10 rounded-md px-6",
+      icon: "size-9",
+    },
+  },
+})
+```
+
+### Data-slot attributes
+
+Every component includes a `data-slot` attribute for consistent styling and testing hooks:
+
+```tsx
+<button data-slot="button" className={cn(buttonVariants({ variant, size }))}>
+```
+
+### Accessibility
+
+Components follow accessibility best practices:
+- Focus-visible rings for keyboard navigation
+- ARIA roles and attributes from Radix primitives
+- `aria-invalid` patterns for form validation states
+- Semantic HTML structure
+
+## Provider hierarchy
+
+The root layout (`app/layout.tsx`) sets up the provider chain:
+
+```
+<html> → <body> → <ThemeProvider> → <main> + <Footer>
+```
+
+- **Font**: Inter (Google Fonts)
+- **Theme**: System-aware with manual override
+- **Hydration**: `suppressHydrationWarning` for theme flash prevention
+
+## Path aliases
+
+Components use TypeScript path aliases:
+
+```typescript
+import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
+import { useTheme } from "@/hooks/use-theme"
+```
+
+Configuration in `components.json`:
+
+| Alias | Path |
+|-------|------|
+| `@/components` | `components/` |
+| `@/components/ui` | `components/ui/` |
+| `@/lib` | `lib/` |
+| `@/hooks` | `hooks/` |

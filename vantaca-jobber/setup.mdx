@@ -1,0 +1,64 @@
+---
+title: "Setup"
+description: "Configure Vantaca credentials and Jobber OAuth for work order sync."
+---
+
+## Vantaca configuration
+
+Vantaca uses credential-based authentication. Set these environment variables:
+
+```bash
+VANTACA_API_URL=https://api.vantaca.net
+VANTACA_COMPANY_ID=your-company-id
+VANTACA_USER_ID=your-user-id
+VANTACA_PASSWORD=your-password
+```
+
+The Vantaca client (`lib/vantaca-client.ts`) authenticates with these credentials on every request. No OAuth flow is needed.
+
+## Jobber OAuth setup
+
+<Steps>
+  <Step title="Create a Jobber app">
+    Register an application in the Jobber Developer portal to get a client ID and secret.
+  </Step>
+  <Step title="Set environment variables">
+    ```bash
+    JOBBER_CLIENT_ID=your-client-id
+    JOBBER_CLIENT_SECRET=your-client-secret
+    JOBBER_REDIRECT_URI=http://localhost:3000/api/auth/jobber/callback
+    ```
+  </Step>
+  <Step title="Authorize the connection">
+    Navigate to `/api/auth/jobber` in your browser. This initiates the OAuth flow and stores tokens in the `jobber_oauth_tokens` table.
+  </Step>
+  <Step title="Configure the custom field">
+    The sync module uses a Jobber custom field to store the Vantaca XN number on each job. Set the base64-encoded GraphQL ID:
+
+    ```bash
+    JOBBER_CUSTOM_FIELD_XN_NUMBER_ID=Z2lkOi8v...
+    ```
+
+    This ID comes from the Jobber API after creating a text custom field named "XN Number" on the job object.
+  </Step>
+</Steps>
+
+## Custom field mapping
+
+The `JOBBER_CUSTOM_FIELD_XN_NUMBER_ID` links Vantaca work orders to Jobber jobs. When a Jobber job is created, the Vantaca XN number is written to this custom field. This enables:
+- Bidirectional lookup between systems
+- XN number display in Jobber's UI
+- Webhook event correlation
+
+## Verify the connection
+
+After setup, trigger a manual sync to verify both connections work:
+
+```bash
+curl -X POST http://localhost:3000/api/cron \
+  -H "Authorization: Bearer your-cron-secret" \
+  -H "Content-Type: application/json" \
+  -d '{"reason": "Testing initial setup"}'
+```
+
+Check the response for any errors. If successful, you'll see counts for processed, created, and updated work orders.

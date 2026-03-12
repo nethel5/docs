@@ -1,0 +1,99 @@
+---
+title: "Theming"
+description: "CSS custom properties, oklch color space, and light/dark mode configuration."
+---
+
+MVSoftware uses CSS custom properties with the oklch color space for theming. Light and dark modes are managed by `next-themes` with class-based switching.
+
+## Theme provider
+
+The `ThemeProvider` component (`components/theme-provider.tsx`) wraps the application:
+
+```typescript
+<ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+  {children}
+</ThemeProvider>
+```
+
+- **`attribute="class"`**: Applies `.dark` class to `<html>` for dark mode
+- **`defaultTheme="system"`**: Respects the user's OS preference
+- **`enableSystem`**: Watches for OS theme changes
+
+## Theme toggle
+
+The `ThemeToggle` component (`components/theme-toggle.tsx`) provides a light/dark switcher using Sun/Moon icons from Lucide React. It includes a hydration guard (`useMounted` hook) to prevent flash on initial load.
+
+## Color system
+
+Colors are defined in `app/globals.css` using the oklch color space for perceptually uniform color mixing:
+
+### Light mode (`:root`)
+
+| Token | Purpose |
+|-------|---------|
+| `--background` / `--foreground` | Page background and default text |
+| `--card` / `--card-foreground` | Card surfaces |
+| `--popover` / `--popover-foreground` | Popover/dropdown surfaces |
+| `--primary` / `--primary-foreground` | Primary actions and buttons |
+| `--secondary` / `--secondary-foreground` | Secondary actions |
+| `--muted` / `--muted-foreground` | Subdued backgrounds and text |
+| `--accent` / `--accent-foreground` | Hover states and highlights |
+| `--destructive` | Destructive action color |
+| `--border` | Border color |
+| `--input` | Form input borders |
+| `--ring` | Focus ring color |
+
+### Dark mode (`.dark`)
+
+Each token has a corresponding dark mode value applied via the `.dark` class selector.
+
+### Chart colors
+
+Five chart colors (`--chart-1` through `--chart-5`) are defined for Recharts visualizations, with distinct values for light and dark modes.
+
+### Sidebar colors
+
+Dedicated tokens for sidebar styling: `--sidebar`, `--sidebar-foreground`, `--sidebar-primary`, `--sidebar-accent`, `--sidebar-border`, `--sidebar-ring`.
+
+## Radius system
+
+A base radius variable generates consistent border-radius values:
+
+```css
+--radius: 0.625rem;
+--radius-sm: calc(var(--radius) - 4px);
+--radius-md: calc(var(--radius) - 2px);
+--radius-lg: var(--radius);
+--radius-xl: calc(var(--radius) + 4px);
+```
+
+## Using tokens in components
+
+Reference color tokens with Tailwind utilities:
+
+```tsx
+<div className="bg-background text-foreground">
+  <button className="bg-primary text-primary-foreground">
+    Action
+  </button>
+  <p className="text-muted-foreground">Helper text</p>
+</div>
+```
+
+## Customizing colors
+
+To change the color scheme, edit the oklch values in `app/globals.css`:
+
+```css
+:root {
+  --primary: oklch(0.55 0.2 250);       /* Your primary color */
+  --primary-foreground: oklch(0.98 0 0); /* Text on primary */
+}
+
+.dark {
+  --primary: oklch(0.65 0.2 250);       /* Brighter for dark mode */
+  --primary-foreground: oklch(0.98 0 0);
+}
+```
+
+The base color scheme is **slate** as configured in `components.json`.

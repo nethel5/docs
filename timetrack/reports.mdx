@@ -1,0 +1,50 @@
+---
+title: "Reports"
+description: "RAG-powered semantic search and analytics over time entry data."
+---
+
+The reports module at `/timetrack/reports` provides semantic search over time entry data using Voyage AI embeddings. Users can query time data with natural language instead of structured filters.
+
+## Semantic search
+
+The RAG (Retrieval-Augmented Generation) endpoint uses Voyage AI to create vector embeddings of time entry descriptions and match them against natural language queries.
+
+### Example queries
+
+- "How much time was spent on plumbing repairs last month?"
+- "Show all after-hours work for Willow Creek"
+- "Find irrigation system maintenance entries in Q4"
+- "Total hours billed to Mountain View HOA this year"
+
+### How it works
+
+1. Time entry descriptions are embedded using Voyage AI (`lib/embeddings.ts`)
+2. User queries are embedded with the same model
+3. Vector similarity search finds the most relevant entries
+4. Results are returned with relevance scores
+
+### API endpoint
+
+```
+GET /api/timetrack/reports/rag?q=your+search+query
+```
+
+## Accuracy dashboard
+
+The accuracy dashboard at `/timetrack/admin/accuracy` (admin only) tracks AI classifier performance:
+
+- Classification accuracy over time
+- Confidence score distribution
+- Flag frequency by type
+- Override rates (human corrections to AI decisions)
+- Trends in classification quality
+
+## Health diagnostics
+
+The health dashboard at `/timetrack/admin/health` (admin only) shows:
+
+- ClickUp sync status and last successful poll
+- AI classifier response times
+- Database connection health
+- External API circuit breaker states
+- Queue depths for approvals and notifications

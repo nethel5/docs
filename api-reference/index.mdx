@@ -1,0 +1,82 @@
+---
+title: "API reference"
+description: "Complete reference for all MVSoftware API endpoints."
+---
+
+MVSoftware exposes 75+ API endpoints through Next.js API routes. All endpoints are organized under `/api/`.
+
+## Authentication patterns
+
+| Pattern | Used by | Mechanism |
+|---------|---------|-----------|
+| **Session auth** | Most endpoints | NextAuth JWT session via `getServerSession()` |
+| **Cron auth** | Scheduled tasks | `X-Cron-Secret` header or Bearer token matching `CRON_SECRET` |
+| **Webhook signature** | Jobber webhooks | HMAC-SHA256 signature verification |
+| **Public** | Health check | No auth required |
+
+## Role-based access
+
+Session-authenticated endpoints enforce role requirements:
+
+| Role | Access |
+|------|--------|
+| `admin` | Full access including settings, export, billing data |
+| `approver` | Reports, document review, classification overrides |
+| `viewer` | Limited read-only access to own data |
+
+## Common patterns
+
+### Error responses
+
+All endpoints use standard HTTP status codes:
+
+| Status | Meaning |
+|--------|---------|
+| 400 | Bad request (missing or invalid parameters) |
+| 401 | Not authenticated |
+| 403 | Insufficient permissions |
+| 404 | Resource not found |
+| 422 | Validation error |
+| 429 | Rate limited |
+| 500 | Internal server error |
+
+### Streaming responses
+
+Some endpoints use NDJSON (newline-delimited JSON) for streaming:
+- `/api/timetrack/sync` — progress events during ClickUp sync
+- `/api/timetrack/classify/stream` — streaming classification results
+
+Each line is a complete JSON object.
+
+### Pagination
+
+Paginated endpoints accept:
+- `limit` — items per page (1-100, default 50)
+- `offset` — skip N items (default 0)
+
+### Batch operations
+
+Batch endpoints accept arrays with size caps (typically 500 items max) to prevent request timeouts.
+
+## Endpoint groups
+
+<Columns>
+  <Card title="Auth" icon="lock" href="/api-reference/auth">
+    OAuth flows for Jobber, ClickUp, and QuickBooks.
+  </Card>
+  <Card title="Health" icon="heart-pulse" href="/api-reference/health">
+    Application and service health checks.
+  </Card>
+  <Card title="Cron" icon="clock" href="/api-reference/cron">
+    Scheduled task endpoints.
+  </Card>
+  <Card title="TimeTrack" icon="timer" href="/api-reference/timetrack-sync">
+    Time entry sync, classification, export, and admin endpoints.
+  </Card>
+  <Card title="Receipts" icon="receipt" href="/api-reference/receipt-analysis">
+    Receipt upload, processing, and stocking endpoints.
+  </Card>
+  <Card title="Teams bot" icon="bell" href="/api-reference/teams-bot">
+    Bot activity endpoint.
+  </Card>
+</Columns>

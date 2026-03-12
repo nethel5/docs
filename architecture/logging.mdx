@@ -1,0 +1,64 @@
+---
+title: "Logging and monitoring"
+description: "Structured logging with Sentry integration and request tracing."
+---
+
+MVSoftware uses Sentry for error tracking and structured logging. All log functions are defined in `lib/logger.ts` and wrap the Sentry logger.
+
+## Log levels
+
+| Function | Use case |
+|----------|----------|
+| `logDebug(message, context?)` | Development diagnostics, not sent to Sentry in production |
+| `logInfo(message, context?)` | Normal operations like API calls, sync completions |
+| `logWarn(message, context?)` | Unexpected but non-critical situations |
+| `logError(message, error, context?)` | Errors that need attention, automatically sent to Sentry |
+| `logApiCall(api, endpoint, method, context?)` | External API call logging with structured metadata |
+
+## Error capture
+
+`logError` automatically sends exceptions to Sentry with contextual metadata:
+
+```typescript
+logError("Failed to sync work order", error, {
+  operation: "pipeline_sync",
+  workOrderId: "WO-12345",
+  attempt: 2
+});
+```
+
+This captures the exception in Sentry with the `operation` tag and all extra context attached.
+
+## Request tracing
+
+Each incoming request receives a unique correlation ID via the `x-request-id` header, set in `middleware.ts`. This ID propagates through all log entries and Sentry events for a given request, making it possible to trace a complete request lifecycle.
+
+## Sentry configuration
+
+Sentry is configured in three files:
+
+| File | Scope |
+|------|-------|
+| `sentry.server.config.ts` | Server-side Node.js runtime |
+| `sentry.edge.config.ts` | Edge middleware runtime |
+| `next.config.ts` | Build-time source map uploads |
+
+The `@sentry/nextjs` integration automatically instruments:
+- API route handlers
+- Server component rendering
+- Database queries
+- External HTTP calls
+
+## Cron job instrumentation
+
+Scheduled tasks are wrapped in Sentry spans for performance monitoring:
+
+```typescript
+// Example from the cron orchestrator
+Sentry.startSpan(
+  { name: "Scheduled Work Order Sync", op: "cron.sync" },
+  async () => { /* sync logic */ }
+);
+```
+
+This creates traces in Sentry's performance dashboard, showing duration, error rates, and throughput for each scheduled task.

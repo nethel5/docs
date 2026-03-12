@@ -1,0 +1,83 @@
+---
+title: "TimeTrack export"
+description: "QuickBooks export generation and preview endpoints."
+---
+
+## `POST /api/timetrack/export`
+
+Generate and send an export batch to QuickBooks or download as CSV.
+
+**Auth**: Session (admin only).
+
+<ParamField body="entryIds" type="string[]" required>
+  Entry IDs to include in the export.
+</ParamField>
+
+<ParamField body="mode" type="string">
+  Export mode: `"csv"` for file download, `"qbo"` for QuickBooks API. Default: `"csv"`.
+</ParamField>
+
+<ParamField body="startDate" type="string">
+  Optional date range filter start (ISO 8601).
+</ParamField>
+
+<ParamField body="endDate" type="string">
+  Optional date range filter end (ISO 8601).
+</ParamField>
+
+**Response** `200`
+```json
+{
+  "success": true,
+  "batchId": "batch-abc123",
+  "invoices": [
+    {
+      "clientId": "client-456",
+      "clientName": "Mountain View HOA",
+      "lineItems": 12,
+      "totalHours": 45.5,
+      "totalAmount": 6825.00
+    }
+  ]
+}
+```
+
+---
+
+## `POST /api/timetrack/export/preview`
+
+Preview export contents without creating a batch. Runs validation and returns what would be included.
+
+**Auth**: Session (admin only).
+
+<ParamField body="entryIds" type="string[]" required>
+  Entry IDs to preview.
+</ParamField>
+
+**Response** `200`
+```json
+{
+  "totals": {
+    "entries": 150,
+    "hours": 320.5,
+    "amount": 48075.00
+  },
+  "byClient": [
+    {
+      "clientId": "client-456",
+      "clientName": "Mountain View HOA",
+      "entries": 45,
+      "hours": 102.5,
+      "amount": 15375.00
+    }
+  ],
+  "validation": [
+    {
+      "entryId": "entry-789",
+      "excluded": true,
+      "reason": "blocking_flags",
+      "flags": ["missing_rate"]
+    }
+  ]
+}
+```

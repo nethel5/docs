@@ -1,0 +1,56 @@
+---
+title: "Notifications"
+description: "Notification types, content, and delivery for Teams messages."
+---
+
+## Notification types
+
+### Approval requests
+
+Sent when a time entry is flagged and routed to an approver. The notification includes:
+- Entry description and duration
+- Author name
+- Flag type and reason
+- Link to the approval queue
+
+### Approval reminders
+
+Sent daily to approvers with pending items. The reminder includes:
+- Count of pending approvals
+- Oldest pending item age
+- Link to the approval queue
+
+### Escalation alerts
+
+Sent to admins when an approval exceeds the 3-day deadline. The alert includes:
+- The escalated entry details
+- Original approver name
+- Time since the entry was flagged
+
+### Sync failure alerts
+
+Sent when the Vantaca-Jobber sync pipeline encounters errors. The alert includes:
+- Error message
+- Affected work orders
+- Link to the dashboard
+
+### Daily digest
+
+A summary of the day's activity:
+- Time entries synced and classified
+- Approvals completed
+- Exports generated
+- Scrubbing jobs progressed
+- Any errors or warnings
+
+### Weekly report
+
+Performance metrics and trends:
+- Total hours tracked
+- AI classification accuracy
+- Approval queue throughput
+- Sync success rates
+
+## Delivery
+
+All notifications are queued in the `teams_notification_queue` table and delivered by the `teams-notifications` cron job. This decouples notification creation from delivery, ensuring the main application doesn't block on Teams API calls.

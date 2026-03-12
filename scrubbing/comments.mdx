@@ -1,0 +1,39 @@
+---
+title: "Comments"
+description: "Comment types, review notes, and status change records."
+---
+
+Every scrubbing job maintains a comment history that tracks all activity. Comments are stored in the `scrubbing_comments` table.
+
+## Comment types
+
+| Type | Created by | Purpose |
+|------|-----------|---------|
+| `note` | User | Free-text notes, questions, or observations |
+| `review` | Reviewer | Feedback on the scrubbing work, reasons for returning |
+| `status_change` | System | Automatic record when a job changes status |
+| `system` | System | Webhook events, reconciliation updates |
+
+## Comment fields
+
+| Field | Description |
+|-------|-------------|
+| `job_id` | The scrubbing job this comment belongs to |
+| `comment_type` | One of `note`, `review`, `status_change`, `system` |
+| `author_id` | The user who created the comment (null for system comments) |
+| `content` | The comment text |
+| `created_at` | Timestamp |
+
+## Status change records
+
+When a job transitions between statuses, a `status_change` comment is automatically created recording:
+- The previous status
+- The new status
+- The action that triggered the transition
+- The user who performed the action
+
+This creates a complete audit trail of every job's progression through the workflow.
+
+## Review feedback
+
+When a reviewer returns a job to `changes_required`, they provide `review` comments explaining what needs to be corrected. The scrubber can reference these comments when making corrections.

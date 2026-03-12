@@ -1,0 +1,33 @@
+---
+title: "Product categories"
+description: "Product taxonomy for organizing receipt items and stocking recommendations."
+---
+
+The stocking categories module (`lib/stocking-categories.ts`) defines a hierarchical product taxonomy used to organize extracted receipt items and stocking recommendations.
+
+## Category hierarchy
+
+Items are organized into categories by the type of work they support. The taxonomy includes categories such as:
+
+- **Plumbing** — pipes, fittings, valves, fixtures
+- **Electrical** — wire, switches, outlets, breakers
+- **Irrigation** — sprinkler heads, controllers, pipe, valves
+- **General maintenance** — fasteners, adhesives, cleaning supplies
+- **Safety** — PPE, signage, first aid
+- **Tools** — hand tools, power tools, consumable accessories
+
+## How categories are assigned
+
+Categories are assigned during the [normalization](/receipt-analysis/normalizer) step:
+
+1. UPC-matched products inherit the category from the canonical product record
+2. Semantically matched products inherit the category from the matched canonical product
+3. Unmatched products are assigned a category by the AI extractor based on the description
+
+## Category management
+
+New categories can be added to the taxonomy in `lib/stocking-categories.ts`. Each category includes:
+- A unique identifier
+- A display name
+- A parent category (for hierarchy)
+- Keywords for automatic assignment

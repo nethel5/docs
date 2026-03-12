@@ -1,0 +1,271 @@
+---
+title: "Receipt analysis endpoints"
+description: "Receipt upload, processing, item management, and stocking endpoints."
+---
+
+## Receipts
+
+### `GET /api/receipt-analysis/receipts`
+
+List receipts with pagination and filtering.
+
+**Auth**: Session.
+
+<ParamField query="status" type="string">
+  Filter by status: `pending`, `processed`, `failed`.
+</ParamField>
+
+<ParamField query="limit" type="number" default="50">
+  Items per page (1-100).
+</ParamField>
+
+<ParamField query="offset" type="number" default="0">
+  Number of items to skip.
+</ParamField>
+
+**Response** `200`
+```json
+{
+  "data": [
+    { "id": "receipt-123", "vendor": "Home Depot", "total": 245.67, "status": "processed", "itemCount": 12 }
+  ],
+  "count": 45,
+  "limit": 50,
+  "offset": 0
+}
+```
+
+---
+
+### `GET /api/receipt-analysis/receipts/[id]`
+
+Get receipt details with extracted line items.
+
+**Auth**: Session.
+
+**Response** `200`
+```json
+{
+  "receipt": { "id": "receipt-123", "vendor": "Home Depot", "total": 245.67, "status": "processed" },
+  "items": [
+    { "id": "item-456", "description": "1/2 inch PVC pipe", "quantity": 10, "unitPrice": 3.49, "confidence": 0.95 }
+  ]
+}
+```
+
+---
+
+### `POST /api/receipt-analysis/receipts/[id]/retry`
+
+Retry processing for a failed receipt.
+
+**Auth**: Session.
+
+**Response** `200`
+```json
+{ "success": true, "id": "receipt-123", "status": "pending" }
+```
+
+---
+
+### `POST /api/receipt-analysis/upload`
+
+Upload a Clyr/BILL export file.
+
+**Auth**: Session (admin only).
+
+**Request**: `multipart/form-data` with XLSX or CSV file.
+
+**Response** `200`
+```json
+{
+  "success": true,
+  "inserted": 15,
+  "duplicates": 2,
+  "errors": []
+}
+```
+
+---
+
+### `POST /api/receipt-analysis/process`
+
+Trigger AI extraction on pending receipts. Processes up to 20 receipts per call.
+
+**Auth**: Session (admin only).
+
+**Response** `200`
+```json
+{
+  "success": true,
+  "processed": 8,
+  "failed": 0,
+  "totalItems": 96
+}
+```
+
+---
+
+## Items
+
+### `GET /api/receipt-analysis/items`
+
+List canonical items by tab.
+
+**Auth**: Session.
+
+<ParamField query="tab" type="string" default="matched">
+  View: `matched`, `review`, or `non_maintenance`.
+</ParamField>
+
+<ParamField query="category" type="string">
+  Filter by product category.
+</ParamField>
+
+<ParamField query="limit" type="number" default="500">
+  Items per page.
+</ParamField>
+
+<ParamField query="offset" type="number" default="0">
+  Number of items to skip.
+</ParamField>
+
+**Response** `200`
+```json
+{
+  "tab": "matched",
+  "data": [
+    { "id": "canonical-789", "name": "PVC Pipe 1/2 inch", "category": "plumbing", "lastPrice": 3.49 }
+  ],
+  "count": 120
+}
+```
+
+---
+
+### `GET /api/receipt-analysis/items/[id]`
+
+Canonical item detail with price history and vendor comparison.
+
+**Auth**: Session.
+
+**Response** `200`
+```json
+{
+  "item": { "id": "canonical-789", "name": "PVC Pipe 1/2 inch", "category": "plumbing" },
+  "priceHistory": [
+    { "date": "2025-01-15", "vendor": "Home Depot", "price": 3.49 }
+  ],
+  "vendorComparison": [
+    { "vendor": "Home Depot", "currentPrice": 3.49 },
+    { "vendor": "Ferguson", "currentPrice": 3.25 }
+  ],
+  "children": []
+}
+```
+
+---
+
+### `POST /api/receipt-analysis/items/confirm-match`
+
+Confirm a receipt item matches a canonical product.
+
+**Auth**: Session.
+
+<ParamField body="receiptItemId" type="string" required>Receipt item ID.</ParamField>
+<ParamField body="canonicalItemId" type="string" required>Canonical product ID.</ParamField>
+<ParamField body="rawDescription" type="string" required>Original description for learning.</ParamField>
+
+---
+
+### `POST /api/receipt-analysis/items/create-canonical`
+
+Create a new canonical product and link a receipt item to it.
+
+**Auth**: Session.
+
+<ParamField body="receiptItemId" type="string" required>Receipt item to link.</ParamField>
+<ParamField body="canonicalName" type="string" required>Name for the new product.</ParamField>
+
+---
+
+### `POST /api/receipt-analysis/items/archive`
+
+Archive items by setting `archived_at`.
+
+**Auth**: Session.
+
+<ParamField body="canonicalItemIds" type="string[]">Canonical item IDs to archive.</ParamField>
+<ParamField body="receiptItemIds" type="string[]">Receipt item IDs to archive.</ParamField>
+
+---
+
+### `POST /api/receipt-analysis/items/restore`
+
+Restore an archived non-maintenance item.
+
+**Auth**: Session.
+
+<ParamField body="itemId" type="string" required>Item ID to restore.</ParamField>
+
+---
+
+## Dashboard & optimization
+
+### `GET /api/receipt-analysis/dashboard`
+
+Dashboard metrics and top stocking recommendations.
+
+**Auth**: Session.
+
+**Response** `200`
+```json
+{
+  "metrics": { "totalReceipts": 120, "totalItems": 1500, "matchRate": 0.85 },
+  "recommendations": [
+    { "name": "PVC Pipe 1/2 inch", "recommendedQty": 20, "currentUsage": 15 }
+  ]
+}
+```
+
+---
+
+### `POST /api/receipt-analysis/optimize`
+
+Generate a vendor-split shopping list with savings calculation.
+
+**Auth**: Session.
+
+<ParamField body="items" type="array" required>
+  Array of items with quantities for bulk analysis.
+</ParamField>
+
+---
+
+## Stocking
+
+### `GET /api/receipt-analysis/stocking`
+
+Active stocking categories with enriched item details.
+
+**Auth**: Session.
+
+---
+
+### `PATCH /api/receipt-analysis/stocking/[id]`
+
+Update the manager quantity override for a stocking category.
+
+**Auth**: Session.
+
+<ParamField body="manager_qty_override" type="number|null" required>
+  Override quantity, or `null` to remove the override.
+</ParamField>
+
+---
+
+### `POST /api/receipt-analysis/stocking/generate`
+
+Generate or refresh AI-based stocking categories.
+
+**Auth**: Session.

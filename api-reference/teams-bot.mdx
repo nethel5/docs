@@ -1,0 +1,36 @@
+---
+title: "Teams bot endpoint"
+description: "Microsoft Bot Framework activity handler."
+---
+
+## `POST /api/teams/bot`
+
+Handles incoming Microsoft Teams bot activities.
+
+**Auth**: Bot Framework middleware (Teams token verification).
+
+This endpoint is called by Microsoft Teams when:
+- A user sends a message to the bot
+- A user installs or uninstalls the bot
+- A user interacts with an adaptive card action
+- A conversation update occurs
+
+### Activity types
+
+| Type | Description |
+|------|-------------|
+| `message` | User sent a text message to the bot |
+| `conversationUpdate` | User installed the bot or was added to a conversation |
+| `invoke` | User clicked an adaptive card action button |
+
+### Conversation registration
+
+When a user first interacts with the bot, their conversation reference is stored in the `teams_bot_service_configuration` table. This reference is used for proactive notifications.
+
+### Request format
+
+The request body follows the [Bot Framework Activity schema](https://learn.microsoft.com/en-us/azure/bot-service/rest-api/bot-framework-rest-connector-api-reference). Authentication is handled by the Bot Framework adapter (`lib/teams-bot/adapter.ts`).
+
+### Response
+
+Returns a Bot Framework-compliant response. The endpoint handles errors gracefully — failed message processing returns a 200 to prevent Teams from retrying the same message.

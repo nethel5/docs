@@ -1,0 +1,35 @@
+---
+title: "Dashboard"
+description: "Monitor sync status and trigger manual syncs from the dashboard."
+---
+
+The main dashboard at `/dashboard` provides a real-time view of the Vantaca-Jobber sync pipeline.
+
+## Features
+
+### Sync status overview
+
+The dashboard displays:
+- Total work orders tracked
+- Work orders by pipeline state (monitoring, stored, job created, etc.)
+- Recent sync activity with timestamps
+- Error counts and failed work orders
+
+### Manual sync trigger
+
+Admins can trigger a manual sync directly from the dashboard. This calls `POST /api/cron` with a reason for audit logging.
+
+<Note>
+  Manual syncs are rate-limited to one per 60 seconds to prevent overlapping operations.
+</Note>
+
+### Error visibility
+
+Failed work orders are highlighted with:
+- The error message from the failed transition
+- The pipeline state where the failure occurred
+- A retry button to re-process individual work orders
+
+## Refresh behavior
+
+The dashboard polls for updated data periodically. Sync status updates appear without a full page reload.

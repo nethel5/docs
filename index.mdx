@@ -1,97 +1,54 @@
 ---
-title: "Introduction"
-description: "Welcome to the new home for your documentation"
+title: "MVSoftware"
+description: "An integration platform for field service businesses, connecting Vantaca, Jobber, ClickUp, QuickBooks, and Microsoft Teams."
 ---
 
-## Setting up
+MVSoftware is a multi-module operations platform built on Next.js 15 that automates work order synchronization, time tracking, job scrubbing, and receipt analysis for field service businesses.
 
-Get your documentation site up and running in minutes.
+## Modules
 
-<Card
-  title="Start here"
-  icon="rocket"
-  href="/quickstart"
-  horizontal
->
-  Follow our three step quickstart guide.
-</Card>
-
-## Make it yours
-
-Design a docs site that looks great and empowers your users.
-
-<Columns cols={2}>
-  <Card
-    title="Edit locally"
-    icon="pen-to-square"
-    href="/development"
-  >
-    Edit your docs locally and preview them in real time.
+<Columns>
+  <Card title="Vantaca-Jobber sync" icon="arrows-rotate" href="/vantaca-jobber">
+    Synchronize work orders between Vantaca HOA management and Jobber field service, including attachments and status updates.
   </Card>
-  <Card
-    title="Customize your site"
-    icon="palette"
-    href="/essentials/settings"
-  >
-    Customize the design and colors of your site to match your brand.
+  <Card title="TimeTrack" icon="clock" href="/timetrack">
+    Pull time entries from ClickUp, classify billability with AI, route approvals, and export to QuickBooks.
   </Card>
-    <Card
-    title="Set up navigation"
-    icon="map"
-    href="/essentials/navigation"
-  >
-    Organize your docs to help users find what they need and succeed with your product.
+  <Card title="Job scrubbing" icon="list-check" href="/scrubbing">
+    Review completed Jobber jobs through an 11-stage Kanban workflow from field completion to invoicing.
   </Card>
-  <Card
-    title="API documentation"
-    icon="terminal"
-    href="/api-reference/introduction"
-  >
-    Auto-generate API documentation from OpenAPI specifications.
+  <Card title="Receipt analysis" icon="receipt" href="/receipt-analysis">
+    Extract line items from BILL platform exports with AI, track vendor pricing, and generate van stocking recommendations.
+  </Card>
+  <Card title="Teams bot" icon="bell" href="/teams-bot">
+    Send real-time notifications to Microsoft Teams for approval queues, sync failures, and scheduled digests.
   </Card>
 </Columns>
 
-## Create beautiful pages
+## Tech stack
 
-Everything you need to create world-class documentation.
+| Layer | Technology |
+|-------|-----------|
+| Framework | Next.js 15 (App Router, Turbopack) |
+| Language | TypeScript (strict mode) |
+| Database | Supabase (PostgreSQL) |
+| UI | Tailwind CSS 4, shadcn/ui |
+| Auth | NextAuth.js with Azure AD |
+| AI | Anthropic Claude (classification), Voyage AI (embeddings) |
+| Monitoring | Sentry with structured logging |
+| Testing | Vitest, MSW, jsdom |
+| Deployment | Vercel |
 
-<Columns cols={2}>
-  <Card
-    title="Write with MDX"
-    icon="pen-fancy"
-    href="/essentials/markdown"
-  >
-    Use MDX to style your docs pages.
-  </Card>
-  <Card
-    title="Code samples"
-    icon="code"
-    href="/essentials/code"
-  >
-    Add sample code to demonstrate how to use your product.
-  </Card>
-  <Card
-    title="Images"
-    icon="image"
-    href="/essentials/images"
-  >
-    Display images and other media.
-  </Card>
-  <Card
-    title="Reusable snippets"
-    icon="recycle"
-    href="/essentials/reusable-snippets"
-  >
-    Write once and reuse across your docs.
-  </Card>
-</Columns>
+## Next steps
 
-## Need inspiration?
-
-<Card
-  title="See complete examples"
-  icon="stars"
-  href="https://mintlify.com/customers"
->
-  Browse our showcase of exceptional documentation sites.
-</Card>
+<Steps>
+  <Step title="Set up your environment">
+    Follow the [quickstart guide](/quickstart) to install dependencies and configure environment variables.
+  </Step>
+  <Step title="Understand the architecture">
+    Read the [architecture overview](/architecture/overview) to learn how modules connect.
+  </Step>
+  <Step title="Explore a module">
+    Pick a module above to dive into its configuration, workflows, and API endpoints.
+  </Step>
+</Steps>

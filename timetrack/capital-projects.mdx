@@ -1,0 +1,36 @@
+---
+title: "Capital projects"
+description: "Link time entries to fixed assets for depreciation tracking."
+---
+
+The capital projects module (`lib/capital-projects.ts`) tracks time spent on work that should be capitalized as fixed assets rather than expensed immediately. This is used for accounting purposes where labor costs are allocated to depreciable assets.
+
+## How it works
+
+Time entries can be linked to capital projects through the capital projects page at `/timetrack/capital-projects`. Each link records:
+- The time entry
+- The target project/asset
+- The asset category
+- The cost allocation
+
+## Capital project entries
+
+The `capital_project_entries` table stores these links:
+
+| Column | Description |
+|--------|-------------|
+| `entry_id` | FK to the time entry |
+| `project_id` | The capital project identifier |
+| `asset_category` | Category of the fixed asset |
+| `cost_allocation` | Dollar amount allocated to this asset |
+
+## Unmatched entries
+
+Entries tagged for capital project allocation but without a matching project in the system receive the `capital_project_unmatched` flag. This is a blocking flag — it must be resolved by either:
+- Creating the missing capital project
+- Removing the capital project tag from the entry
+- Manually matching the entry to an existing project
+
+## Export handling
+
+Capital project entries are exported to QuickBooks with asset-specific GL codes rather than the standard expense GL codes. This ensures proper accounting treatment in the general ledger.
