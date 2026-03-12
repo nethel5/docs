@@ -1,0 +1,4 @@
+.agents/
+.claude/
+docs.code-workspace
+skills-lock.json
